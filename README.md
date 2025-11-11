@@ -1,6 +1,6 @@
 # 🏫 Rule-Look: 학칙 기반 AI 챗봇 및 학생 커뮤니티
 
-# https://mo-do-ri-project.vercel.app/
+# <a href="[https://www.example.com](https://www.example.com)" target="_blank">https://mo-do-ri-project.vercel.app/</a>
 
 > **Next.js와 MongoDB를 활용하여 동양미래대학교 학칙 정보 접근성을 혁신하는 풀스택 서비스입니다.**
 
