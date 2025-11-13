@@ -2,7 +2,7 @@
 
 [프로젝트 앱](https://mo-do-ri-project.vercel.app/)
 
-> **Next.js와 MongoDB를 활용하여 동양미래대학교 학칙 정보 접근성을 혁신하는 풀스택 서비스입니다.**
+> **Next.js와 MongoDB를 활용하여 다양한 학교의 학칙 정보 접근성을 혁신하는 풀스택 서비스입니다.**
 
 ---
 
