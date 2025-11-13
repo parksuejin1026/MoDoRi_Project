@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "date-fns": "^3.6.0",
+    "googleapis": "^166.0.0",
+    "mongodb": "^7.0.0",
     "mongoose": "^8.4.1",
     "next": "14.2.3",
     "next-auth": "^5.0.0-beta.19",
