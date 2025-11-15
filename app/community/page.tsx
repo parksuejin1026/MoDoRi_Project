@@ -1,11 +1,11 @@
-// 📁 app/community/(post-group)/page.tsx (게시글 목록 화면 - 최종 안정화)
+// 📁 app/community/page.tsx (게시글 목록 화면 - 최종 안정화)
 
 import Link from 'next/link';
 import dbConnect from '@/lib/db/mongodb'; 
 import Post from '@/models/Post'; 
 import { format } from 'date-fns'; 
 
-// 1. 프론트엔드 Display 타입 정의
+// [기능 설명] UI에 필요한 데이터 타입 정의
 interface PostDisplayData {
     _id: string;
     title: string;
@@ -14,7 +14,7 @@ interface PostDisplayData {
     views: number;
 }
 
-// 2. 서버에서 데이터를 가져오는 함수
+// [기능 설명] MongoDB Document에서 가져오는 실제 데이터 타입
 interface MongoPost {
     _id: object; 
     title: string;
@@ -49,22 +49,22 @@ export default async function CommunityPage() {
     const posts = await getPosts(); 
 
     return (
-        <div className="community-container" style={{ maxWidth: '900px', margin: '3rem auto', padding: '0 1rem' }}>
-            <h1 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '1rem', color: 'var(--color-primary)' }}>
+        <div className="community-container" style={{ maxWidth: '900px', margin: '0 auto', padding: '1rem' }}>
+            
+            {/* ⭐️ 모바일 Navigation Bar 스타일의 제목 */}
+            <h1 style={{ fontSize: '1.2rem', fontWeight: 700, padding: '10px 0', borderBottom: '1px solid var(--color-border)', textAlign: 'center' }}>
                 학생 커뮤니티 게시판
             </h1>
-            <p style={{ color: 'var(--color-text-secondary)', marginBottom: '2rem' }}>
-                학칙 관련 질문이나 다양한 학교 생활 정보를 공유하세요.
-            </p>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', marginTop: '1rem' }}>
                 <span style={{ fontSize: '0.9rem', color: 'var(--color-text-secondary)' }}>
                     총 게시글 수: {posts.length}개
                 </span>
-                {/* ⭐️ 글쓰기 버튼 경로를 'add' 폴더로 연결 */}
+                {/* ⭐️ 글쓰기 버튼 경로: /community/add 로 연결 */}
+                {/* <a> 태그를 사용하여 라우팅 충돌을 우회합니다. */}
                 <a href="/community/add" className="btn btn-primary btn-small">
-        글쓰기
-    </a>
+                    글쓰기
+                </a>
             </div>
 
             {/* 게시글 목록 UI */}
@@ -95,10 +95,33 @@ export default async function CommunityPage() {
                     ))
                 ) : (
                     <div style={{ padding: '20px', textAlign: 'center', color: 'var(--color-text-secondary)', borderBottom: '1px solid var(--color-border)' }}>
-                        작성된 게시글이 없습니다. **"글쓰기"** 버튼을 눌러 첫 글을 작성해 보세요!
+                        작성된 게시글이 없습니다. **'글쓰기'** 버튼을 눌러 첫 글을 작성해 보세요!
                     </div>
                 )}
             </div>
+            
+            {/* ⭐️ 모바일 UX: FAB (Floating Action Button) 영역 */}
+            <Link href="/community/add" passHref legacyBehavior>
+                <a style={{
+                    position: 'fixed',
+                    bottom: '80px', 
+                    right: '20px',
+                    width: '56px',
+                    height: '56px',
+                    borderRadius: '50%',
+                    backgroundColor: 'var(--color-primary-dark)',
+                    color: 'var(--color-white)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '2rem',
+                    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.4)',
+                    zIndex: 999,
+                    fontWeight: 'bold',
+                }}>
+                    +
+                </a>
+            </Link>
             
         </div>
     );

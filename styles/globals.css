@@ -1,0 +1,88 @@
+/* 📁 styles/globals.css (최종 모바일 UX CSS) */
+
+/* 1. 색상 변수: 검흰 모던 테마 */
+:root {
+    --color-primary: #1f2937;     /* 검정 계열 (주요 버튼, 탭 활성화) */
+    --color-primary-dark: #000000; /* 순수 검정 */
+    --color-text-primary: #1f2937; /* 짙은 텍스트 */
+    --color-text-secondary: #6b7280; /* 회색 텍스트 */
+    --color-background: #f9fafb;  /* 콘텐츠 배경 (옅은 회색) */
+    --color-white: #ffffff;       /* 흰색 (탭 바, 카드 배경) */
+    --color-border: #e5e7eb;      /* 연한 경계선 */
+
+    --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+* {
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+}
+
+html, body {
+    /* ... (기본 폰트 설정 유지) ... */
+    line-height: 1.5;
+    background-color: #e5e7eb; /* 전체 브라우저 배경 */
+    color: var(--color-text-primary);
+}
+
+/* 2. 모바일 뷰포트 제한 및 컨테이너 */
+.mobile-app-container {
+    max-width: 500px; /* ⭐️ 스마트폰 최대 너비 */
+    min-height: 100vh;
+    margin: 0 auto; /* 중앙 정렬 */
+    background-color: var(--color-white);
+    box-shadow: var(--shadow-lg); /* 앱 느낌의 그림자 */
+    
+    display: flex;
+    flex-direction: column;
+}
+
+/* 3. 콘텐츠 영역 (스크롤 관리) */
+.mobile-content-area {
+    flex-grow: 1;
+    overflow-y: auto; 
+    padding-bottom: 60px; /* ⭐️ 탭 바 높이만큼 하단 공간 확보 */
+    -webkit-overflow-scrolling: touch; /* 모바일 스크롤 부드럽게 */
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+/* 4. 버튼 공통 스타일 */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.6rem 1.2rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    border: 2px solid transparent;
+}
+
+.btn-primary {
+    background-color: var(--color-primary);
+    color: var(--color-white);
+    border: none;
+}
+
+.btn-outline {
+    background-color: transparent;
+    color: var(--color-primary);
+    border-color: var(--color-primary);
+}
+
+.btn-ghost {
+    background-color: transparent;
+    color: var(--color-text-secondary);
+}
+
+.btn-small {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+}
