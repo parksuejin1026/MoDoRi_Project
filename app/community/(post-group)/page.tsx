@@ -4,7 +4,8 @@ import Link from 'next/link';
 import dbConnect from '@/lib/db/mongodb'; 
 import Post from '@/models/Post'; 
 // import { format } from 'date-fns'; // 👈 제거됨
-import PostDate from '@/components/PostDate'; // 👈 새로 추가됨 (경로는 프로젝트 구조에 맞게 조정 필요)
+// import PostDate from '@/components/PostDate'; // 👈 새로 추가됨 (경로는 프로젝트 구조에 맞게 조정 필요)
+import PostDate from '../../../components/PostDate';
 
 // [기능 설명] UI에 필요한 데이터 타입 정의
 interface PostDisplayData {
