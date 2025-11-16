@@ -1,11 +1,14 @@
-// 📁 app/community/(post-group)/[postId]/page.tsx (게시글 상세 페이지 - Read, Delete, Edit 링크 포함)
+// 📁 app/community/(post-group)/[postId]/page.tsx (최종 수정 버전)
 
 import dbConnect from '@/lib/db/mongodb';
 import Post from '@/models/Post'; 
-import { format } from 'date-fns';
+// import { format } from 'date-fns'; // 👈 이 줄을 제거했습니다.
 import Link from 'next/link';
 import { Types } from 'mongoose'; 
-import DeleteButton from '@/components/DeleteButton'; // ⭐️ DeleteButton 컴포넌트 import
+import DeleteButton from '@/components/DeleteButton'; 
+
+// ⭐️ DB 연결 강제 동적 렌더링 (빌드 오류 방지)
+export const dynamic = 'force-dynamic'; 
 
 // URL 파라미터 타입 정의
 interface PostDetailPageProps {
@@ -35,6 +38,7 @@ async function getPost(postId: string): Promise<PostDisplayData | null> {
         await dbConnect();
         
         // 2. MongoDB에서 게시글을 조회합니다.
+        // views 카운트 증가 로직이 필요하다면 여기에 추가할 수 있습니다.
         const post = await Post.findById(postId).lean(); 
         
         if (!post) {
@@ -71,6 +75,17 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
         );
     }
 
+    // 날짜 포맷팅 함수 정의 (date-fns 대체)
+    const formatDate = (dateString: string) => {
+        return new Date(dateString).toLocaleString('ko-KR', { 
+            year: 'numeric', 
+            month: '2-digit', 
+            day: '2-digit', 
+            hour: '2-digit', 
+            minute: '2-digit'
+        });
+    };
+
     // 게시글 상세 내용 UI
     return (
         <div className="post-detail-container" style={{ maxWidth: '900px', margin: '3rem auto', padding: '0 1rem' }}>
@@ -86,7 +101,8 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
             </h1>
             <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '2px solid var(--color-primary)', paddingBottom: '0.8rem', marginBottom: '2rem', fontSize: '0.9rem', color: 'var(--color-text-secondary)' }}>
                 <span>작성자: {post.author}</span>
-                <span>작성일: {format(new Date(post.createdAt), 'yyyy.MM.dd HH:mm')} | 조회수: {post.views}</span>
+                {/* ⭐️ format 함수를 대체했습니다. */}
+                <span>작성일: {formatDate(post.createdAt)} | 조회수: {post.views}</span>
             </div>
 
             {/* 내용 */}
