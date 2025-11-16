@@ -27,6 +27,8 @@ const PostSchema: Schema = new Schema({
 }, {
     timestamps: false, 
     toJSON: { virtuals: true },
+
+    collection: 'commu', // 👈 이 부분을 수정하세요!
 });
 
 // 3. 모델 정의 및 익스포트
