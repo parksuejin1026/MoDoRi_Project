@@ -7,6 +7,9 @@ import Post from '@/models/Post';
 // import PostDate from '@/components/PostDate'; // 👈 새로 추가됨 (경로는 프로젝트 구조에 맞게 조정 필요)
 import PostDate from '../../../components/PostDate';
 
+// Next.js가 이 페이지를 빌드 시점에 정적으로 렌더링하지 못하도록 강제함
+export const dynamic = 'force-dynamic';
+
 // [기능 설명] UI에 필요한 데이터 타입 정의
 interface PostDisplayData {
     _id: string;
