@@ -2,24 +2,21 @@
 
 /** @type {import('next').NextConfig} */ 
 const nextConfig = {
-    // ⭐️ Vercel 이미지 최적화 설정은 유지
     images: {
         remotePatterns: [
             // ... (기존 remotePatterns 내용 유지)
         ],
     },
     
-    // transpilePackages: ['mongoose'], // 👈 이 설정을 제거합니다.
-
-    // ⭐️ [신규 추가]: Mongoose를 번들링에서 제외하여 오류 해결
+    // ⭐️ [최종 수정]: Webpack 설정을 함수 형태로 변경
     webpack: (config, { isServer }) => {
-        // 서버 측 빌드일 때만 적용 (Mongoose는 서버에서만 필요)
+        // 서버 측 빌드일 때만 Mongoose와 aws4를 외부 모듈로 처리
         if (isServer) {
+            // 기존 externals가 객체일 경우 스프레드 연산자로 추가
             config.externals = {
-                ...config.externals,
-                'mongoose': 'mongoose', // Mongoose를 외부 모듈로 처리
-                // aws4 경고도 여기서 처리 가능
-                'aws4': 'aws4',
+                ...(config.externals || {}), // 기존 externals를 유지하거나, 없으면 빈 객체로 시작
+                'mongoose': 'commonjs mongoose', // Mongoose를 Node.js 환경에서 찾도록 commonjs 지정
+                'aws4': 'commonjs aws4',        // aws4 경고 처리
             };
         }
         return config;
