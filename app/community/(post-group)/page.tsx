@@ -1,14 +1,13 @@
-// 📁 app/community/page.tsx (최종 수정 버전)
+// 📁 app/community/(post-group)/page.tsx (Vercel 안정화 최종 버전)
 
 import Link from 'next/link';
 import dbConnect from '@/lib/db/mongodb'; 
 import Post from '@/models/Post'; 
 // import { format } from 'date-fns'; // 👈 제거됨
-// import PostDate from '@/components/PostDate'; // 👈 새로 추가됨 (경로는 프로젝트 구조에 맞게 조정 필요)
-import PostDate from '../../../components/PostDate';
+// import PostDate from '../../../components/PostDate'; // 👈 제거됨
 
-// Next.js가 이 페이지를 빌드 시점에 정적으로 렌더링하지 못하도록 강제함
-export const dynamic = 'force-dynamic';
+// ⭐️ 최종 해결책 1: Next.js에게 빌드 시 사전 렌더링을 막고 런타임에 동적 렌더링(SSR)하도록 강제
+export const dynamic = 'force-dynamic'; 
 
 // [기능 설명] UI에 필요한 데이터 타입 정의
 interface PostDisplayData {
@@ -41,13 +40,13 @@ async function getPosts(): Promise<PostDisplayData[]> {
             title: post.title,
             author: post.author,
             views: post.views,
-            // Date 객체를 문자열로 변환하여 클라이언트 컴포넌트에 안전하게 전달
+            // Date 객체를 문자열로 변환하여 렌더링에 사용
             createdAt: post.createdAt.toISOString(), 
         })) as PostDisplayData[]; 
 
     } catch (error: unknown) {
         console.error("게시글 로드 실패:", error);
-        // DB 연결 실패 시에도 빈 배열 반환하여 사전 렌더링 오류 방지
+        // DB 연결 실패 시에도 빈 배열 반환하여 런타임 오류 방지
         return [];
     }
 }
@@ -96,8 +95,16 @@ export default async function CommunityPage() {
                             </div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: 'var(--color-text-secondary)', marginTop: '5px' }}>
                                 <span>작성자: {post.author}</span>
-                                {/* ⭐️ 클라이언트 컴포넌트 사용 */}
-                                <PostDate dateString={post.createdAt} />
+                                {/* ⭐️ 최종 해결책 2: 기본 JS 함수로 날짜 포맷팅 */}
+                                <span>
+                                    {new Date(post.createdAt).toLocaleString('ko-KR', { 
+                                        year: '2-digit', 
+                                        month: '2-digit', 
+                                        day: '2-digit', 
+                                        hour: '2-digit', 
+                                        minute: '2-digit'
+                                    })}
+                                </span>
                             </div>
                         </Link>
                     ))
