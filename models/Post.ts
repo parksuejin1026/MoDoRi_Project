@@ -1,7 +1,5 @@
 // 📁 models/Post.ts (오류 수정 및 안정화 버전)
 
-'use client'; // Next.js 빌드 시 충돌 방지
-
 import mongoose, { Schema, Model, Document, Types } from 'mongoose'; 
 // ⭐️ mongoose import가 하나로 통합됨
 
