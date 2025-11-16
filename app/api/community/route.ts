@@ -1,9 +1,10 @@
 // 📁 app/api/community/route.ts (최종 에러 해결 버전)
 
 import { NextResponse } from 'next/server';
-import dbConnect from '@/lib/db/mongodb'; 
-import mongoose, { Model } from 'mongoose';
-import { IPostData, IPost } from '@/models/Post'; // 👈 타입만 가져옴
+import mongoose, { Model } from 'mongoose'; 
+// ⭐️ dbConnect(default), PostModel, IPostData, IPost를 mongodb.ts에서 가져옵니다.
+import dbConnect, { PostModel, IPostData, IPost } from '@/lib/db/mongodb'; 
+// 🚨 이전의 import { IPostData, IPost } from '@/models/Post'; 줄은 삭제해야 합니다.
 
 export const dynamic = 'force-dynamic'; 
 
@@ -12,8 +13,8 @@ export async function POST(req: Request) {
     try {
         await dbConnect(); // 1. DB 연결 (스키마 등록 보장)
         
-        // 2. 모델 안전 참조: DB 연결 후에 캐시된 모델을 가져옵니다.
-        const PostModel = mongoose.models.Post as Model<IPost>;
+        // 2. 모델 안전 참조: PostModel이 mongodb.ts에서 이미 정의되었으므로 바로 사용합니다.
+        // PostModel이 정의되지 않았다면 에러를 던집니다.
         if (!PostModel) throw new Error("Post Model not found after connect.");
 
         // 3. 요청 본문(body)에서 데이터 추출
@@ -46,8 +47,7 @@ export async function GET() {
     try {
         await dbConnect(); 
         
-        // ⭐️ GET에서도 모델 안전 참조 적용
-        const PostModel = mongoose.models.Post as Model<IPost>;
+        // ⭐️ GET 요청에서도 PostModel 사용
         if (!PostModel) throw new Error("Post Model not found after connect.");
         
         // DB에서 모든 게시글을 조회

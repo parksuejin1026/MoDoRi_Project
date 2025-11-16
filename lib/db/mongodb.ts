@@ -1,9 +1,41 @@
-// 📁 lib/db/mongodb.ts 파일 내용 (Global Type 확장 및 안정화)
+// 📁 lib/db/mongodb.ts (최종 통합 버전)
 
-import mongoose, { Mongoose } from 'mongoose'; 
+import mongoose, { Mongoose, Schema, Model, Document, Types } from 'mongoose'; 
+// import '@/models/Post'; // 👈 이 줄은 제거합니다.
 
-// ⭐️ 1. 이 파일 내에서 global 객체의 타입을 직접 확장합니다.
-// 이 코드는 global.d.ts 파일에 있는 내용과 동일하지만, 해당 파일이 로드되지 않을 경우를 대비합니다.
+// ⭐️ Post 모델 정의를 이 파일 내부에 직접 통합합니다.
+// 1. 순수 데이터 타입 정의 (IPostData, IPost)
+export interface IPostData {
+    title: string;          
+    content: string;        
+    author: string;         
+    views: number;          
+}
+
+export interface IPost extends IPostData, Document {
+    _id: Types.ObjectId;
+    createdAt: Date;
+}
+
+// 2. Mongoose 스키마 정의
+const PostSchema: Schema = new Schema({
+    title: { type: String, required: [true, '제목을 입력해야 합니다.'], trim: true },
+    content: { type: String, required: [true, '내용을 입력해야 합니다.'] },
+    author: { type: String, required: [true, '작성자 정보가 누락되었습니다.'] },
+    views: { type: Number, default: 0 },
+    createdAt: { type: Date, default: Date.now },
+}, {
+    timestamps: false, 
+    toJSON: { virtuals: true },
+});
+
+// 3. 모델 정의 및 익스포트
+export const PostModel: Model<IPost> = mongoose.models.Post 
+    ? (mongoose.models.Post as Model<IPost>) 
+    : mongoose.model<IPost>('Post', PostSchema);
+
+
+// ⭐️ 4. DB 연결 로직 (이하 동일)
 declare global {
   var mongoose: {
     conn: Mongoose | null;
@@ -11,7 +43,6 @@ declare global {
   }
 }
 
-// 2. 환경 변수 확인 (이전과 동일)
 const MONGODB_URI = process.env.MONGODB_URI;
 
 if (!MONGODB_URI) {
@@ -20,7 +51,6 @@ if (!MONGODB_URI) {
   );
 }
 
-// 3. 전역 변수에 연결 캐싱
 let cached = global.mongoose;
 
 if (!cached) {
@@ -28,6 +58,7 @@ if (!cached) {
 }
 
 async function dbConnect() {
+  // ... (dbConnect 함수 내용 유지) ...
   if (cached.conn) {
     console.log('Using existing DB connection.');
     return cached.conn;
@@ -40,7 +71,6 @@ async function dbConnect() {
 
     console.log('Creating new DB connection...');
     
-    // MONGODB_URI! : string이 확실하다고 명시 (이전 문제 해결)
     cached.promise = mongoose.connect(MONGODB_URI!, opts).then((mongoose) => {
       console.log('DB connection established successfully.');
       return mongoose;
