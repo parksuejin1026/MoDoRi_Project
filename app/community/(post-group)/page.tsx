@@ -1,9 +1,10 @@
-// 📁 app/community/page.tsx (게시글 목록 화면 - 최종 안정화)
+// 📁 app/community/page.tsx (최종 수정 버전)
 
 import Link from 'next/link';
 import dbConnect from '@/lib/db/mongodb'; 
 import Post from '@/models/Post'; 
-import { format } from 'date-fns'; 
+// import { format } from 'date-fns'; // 👈 제거됨
+import PostDate from '@/components/PostDate'; // 👈 새로 추가됨 (경로는 프로젝트 구조에 맞게 조정 필요)
 
 // [기능 설명] UI에 필요한 데이터 타입 정의
 interface PostDisplayData {
@@ -28,6 +29,7 @@ async function getPosts(): Promise<PostDisplayData[]> {
     try {
         await dbConnect();
         
+        // 데이터가 없어도 안전하게 처리되도록 .lean() 사용
         const posts: MongoPost[] = await Post.find({}).sort({ createdAt: -1 }).lean() as MongoPost[]; 
 
         return posts.map(post => ({
@@ -35,11 +37,13 @@ async function getPosts(): Promise<PostDisplayData[]> {
             title: post.title,
             author: post.author,
             views: post.views,
+            // Date 객체를 문자열로 변환하여 클라이언트 컴포넌트에 안전하게 전달
             createdAt: post.createdAt.toISOString(), 
         })) as PostDisplayData[]; 
 
     } catch (error: unknown) {
         console.error("게시글 로드 실패:", error);
+        // DB 연결 실패 시에도 빈 배열 반환하여 사전 렌더링 오류 방지
         return [];
     }
 }
@@ -61,7 +65,6 @@ export default async function CommunityPage() {
                     총 게시글 수: {posts.length}개
                 </span>
                 {/* ⭐️ 글쓰기 버튼 경로: /community/add 로 연결 */}
-                {/* <a> 태그를 사용하여 라우팅 충돌을 우회합니다. */}
                 <a href="/community/add" className="btn btn-primary btn-small">
                     글쓰기
                 </a>
@@ -89,7 +92,8 @@ export default async function CommunityPage() {
                             </div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: 'var(--color-text-secondary)', marginTop: '5px' }}>
                                 <span>작성자: {post.author}</span>
-                                <span>{format(new Date(post.createdAt), 'yy.MM.dd HH:mm')}</span>
+                                {/* ⭐️ 클라이언트 컴포넌트 사용 */}
+                                <PostDate dateString={post.createdAt} />
                             </div>
                         </Link>
                     ))
