@@ -1,6 +1,7 @@
 // 📁 models/Post.ts (오류 수정 및 안정화 버전)
 
 import mongoose, { Schema, Model, Document, Types } from 'mongoose'; 
+import '@/models/Post';
 // ⭐️ mongoose import가 하나로 통합됨
 
 // 1. 순수 데이터 타입을 정의합니다.
