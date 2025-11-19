@@ -1,4 +1,4 @@
-// 📁 components/SchoolSelector.tsx (학교 목록 UI 및 링크 로직)
+// 📁 components/SchoolSelector.tsx (학교 목록 UI)
 
 'use client'; 
 
@@ -9,8 +9,8 @@ const schools = [
     { code: 'dongyang', name: '동양미래대학교' },
     { code: 'hanyang', name: '한양대학교' },
     { code: 'seoultech', name: '서울과학기술대학교' },
-    { code: 'kopo', name: '한국폴리텍대학' },
-    { code: 'konkuk', name: '건국대학교' },
+    { code: 'ansan', name: '안산대학교' },
+    { code: 'soonchunhyang', name: '순천향대학교' }, // ⭐️ 건국대 -> 순천향대 변경
 ];
 
 export default function SchoolSelector() {
@@ -21,7 +21,7 @@ export default function SchoolSelector() {
             </h1>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem', justifyContent: 'center' }}>
                 {schools.map((school) => (
-                    // ⭐️ 선택 시 동적 챗봇 경로로 이동: /chat/[school_code]
+                    // ⭐️ 선택 시 동적 챗봇 경로로 이동: /chat/[schoolCode]
                     <Link href={`/chat/${school.code}`} key={school.code} passHref legacyBehavior>
                         <a style={{ 
                             padding: '1.5rem', 
