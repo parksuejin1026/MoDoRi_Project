@@ -2,6 +2,8 @@
 
 [![Deploy with Vercel](https://img.shields.io/badge/Vercel-Project_App-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://mo-do-ri-project.vercel.app/)
 
+[![PRD Docs](https://img.shields.io/badge/Document-PRD-blue?style=for-the-badge&logo=markdown&logoColor=white)](PRD.md)
+
 > **Next.js와 MongoDB를 활용하여 다양한 학교의 학칙 정보 접근성을 혁신하는 풀스택 서비스입니다.**
 
 ---
