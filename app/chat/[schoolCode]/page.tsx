@@ -1,73 +1,46 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useChat } from 'ai/react';
 import ReactMarkdown from 'react-markdown';
+import { ArrowLeft, Send, Bot, User, RotateCcw } from 'lucide-react';
 
-// [기능 설명] Next.js가 URL 파라미터를 컴포넌트에 전달하기 위한 타입입니다.
 interface ChatPageProps {
   params: {
-    schoolCode: string; // URL에서 넘어오는 학교 코드 (예: 'dongyang')
+    schoolCode: string;
   };
 }
 
 export default function ChatPage({ params }: ChatPageProps) {
   const { schoolCode } = params;
 
-  // ⭐️ [기능 설명] Vercel AI SDK의 useChat 훅 사용
+  // Vercel AI SDK의 useChat 훅 사용
+  // setInput을 추가로 destructuring하여 추천 질문 클릭 시 입력창 제어
   const { messages, input, handleInputChange, handleSubmit, isLoading, setMessages, setInput } = useChat({
-    api: `/api/chat/${schoolCode}`, // ⭐️ 동적 API 경로 설정
+    api: `/api/chat/${schoolCode}`,
     initialMessages: [
-      { id: 'welcome', role: 'assistant', content: "안녕하세요! 학칙 봇입니다. 질문하시면 해당 학교의 학칙을 기반으로 답변해 드립니다." }
+      { id: 'welcome', role: 'assistant', content: "안녕하세요! 학칙 봇입니다. 궁금한 점을 물어보세요." }
     ],
   });
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const [copiedId, setCopiedId] = useState<string | null>(null);
 
-  // [기능 설명] 메시지 목록이 업데이트될 때마다 자동으로 스크롤을 맨 아래로 이동시킵니다.
+  // 메시지가 추가될 때마다 스크롤을 아래로 이동
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // [기능 설명] 입력창 높이 자동 조절
-  useEffect(() => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 150)}px`;
-    }
-  }, [input]);
-
-  // [기능 설명] 채팅 대화 내용을 초기화합니다.
+  // 채팅 초기화 핸들러
   const handleReset = () => {
-    if (confirm('현재 대화 내용을 모두 지우고 새롭게 시작하시겠습니까?')) {
+    if (confirm('대화 내용을 모두 지우고 처음부터 다시 시작하시겠습니까?')) {
       setMessages([
-        { id: 'welcome', role: 'assistant', content: "안녕하세요! 학칙 봇입니다. 질문하시면 해당 학교의 학칙을 기반으로 답변해 드립니다." }
+        { id: 'welcome', role: 'assistant', content: "안녕하세요! 학칙 봇입니다. 궁금한 점을 물어보세요." }
       ]);
     }
   };
 
-  // [기능 설명] 추천 질문 클릭 시 입력창에 자동 입력
-  const handleSuggestedClick = (question: string) => {
-    setInput(question);
-  };
-
-  const handleCopy = (content: string, id: string) => {
-    navigator.clipboard.writeText(content);
-    setCopiedId(id);
-    setTimeout(() => setCopiedId(null), 2000);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      const form = e.currentTarget.form;
-      if (form) form.requestSubmit();
-    }
-  };
-
+  // 추천 질문 목록
   const suggestedQuestions = [
     "휴학은 어떻게 신청해?",
     "장학금 받을 수 있는 조건이 뭐야?",
@@ -75,45 +48,62 @@ export default function ChatPage({ params }: ChatPageProps) {
     "전과하려면 어떻게 해야 해?"
   ];
 
-  // ********** 화면 렌더링 **********
-  return (
-    <div className="chat-page-container">
-      {/* ⭐️ 상단 Navigation Bar */}
-      <div className="chat-actions-bar">
-        <h2 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--color-primary-dark)' }}>
-          {schoolCode.toUpperCase()} 챗봇
-        </h2>
+  // 추천 질문 클릭 핸들러
+  const handleSuggestedClick = (question: string) => {
+    setInput(question);
+  };
 
-        <div className="actions">
-          <Link href="/" passHref legacyBehavior>
-            <a className="btn btn-ghost btn-small" style={{ marginRight: '10px' }}>
-              홈
-            </a>
+  return (
+    <div className="flex flex-col h-full bg-gray-50 overflow-hidden">
+      {/* 챗봇 헤더 */}
+      <div className="px-5 py-4 bg-gradient-to-br from-blue-600 to-blue-700 text-white shadow-md flex flex-col justify-between min-h-[100px]">
+        {/* 상단 네비게이션 행 */}
+        <div className="flex items-center justify-between mb-2">
+          {/* 뒤로가기 버튼 */}
+          <Link href="/select-school" className="flex items-center gap-1 text-white/90 hover:text-white transition-colors px-2 py-1 -ml-2 rounded-lg hover:bg-white/10">
+            <ArrowLeft size={18} />
+            <span className="text-sm font-medium">뒤로가기</span>
           </Link>
-          <button onClick={handleReset} className="btn btn-ghost btn-small">
-            초기화
+
+          {/* 초기화 버튼 */}
+          <button
+            onClick={handleReset}
+            className="flex items-center gap-1 text-white/90 hover:text-white transition-colors px-2 py-1 -mr-2 rounded-lg hover:bg-white/10"
+          >
+            <RotateCcw size={16} />
+            <span className="text-xs font-medium">초기화</span>
           </button>
+        </div>
+
+        {/* 타이틀 영역 */}
+        <div>
+          <h2 className="text-xl font-bold mb-1 uppercase tracking-wide">{schoolCode} 챗봇</h2>
+          <p className="text-xs text-blue-100 opacity-90">학칙에 대해 무엇이든 물어보세요</p>
         </div>
       </div>
 
-      {/* 1. 채팅창 영역 */}
-      <div className="chat-window">
+      {/* 메시지 목록 영역 */}
+      {/* pb-48: 입력창과 추천 질문 영역, 탭바 높이를 고려하여 하단 여백을 넉넉히 줍니다. */}
+      <div className="flex-1 overflow-y-auto p-5 pb-48 space-y-5">
         {messages.map((msg) => (
-          <div key={msg.id} className={`message-row ${msg.role === 'user' ? 'user-row' : 'bot-row'}`}>
-            {msg.role === 'assistant' && <div className="avatar bot-avatar">🤖</div>}
+          <div
+            key={msg.id}
+            className={`flex gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}
+          >
+            {/* 아바타 아이콘 */}
+            <div className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 shadow-sm ${msg.role === 'user' ? 'bg-gray-200 text-gray-600' : 'bg-blue-100 text-blue-600'
+              }`}>
+              {msg.role === 'user' ? <User size={18} /> : <Bot size={18} />}
+            </div>
 
-            <div className={`message-bubble ${msg.role === 'user' ? 'user' : 'bot'}`}>
-              {/* ⭐️ Markdown 렌더링 적용 */}
+            {/* 말풍선 */}
+            <div className={`max-w-[75%] p-3.5 rounded-2xl text-sm leading-relaxed shadow-sm ${msg.role === 'user'
+              ? 'bg-blue-600 text-white rounded-tr-none'
+              : 'bg-white text-gray-800 border border-gray-100 rounded-tl-none'
+              }`}>
               {msg.role === 'assistant' ? (
-                <div className="markdown-content">
+                <div className="prose prose-sm max-w-none text-gray-800 prose-p:my-1 prose-ul:my-2 prose-li:my-0">
                   <ReactMarkdown>{msg.content}</ReactMarkdown>
-                  <button
-                    className="copy-btn"
-                    onClick={() => handleCopy(msg.content, msg.id)}
-                    title="답변 복사"
-                  >
-                    {copiedId === msg.id ? '✅' : '📋'}
-                  </button>
                 </div>
               ) : (
                 msg.content
@@ -122,247 +112,55 @@ export default function ChatPage({ params }: ChatPageProps) {
           </div>
         ))}
 
-        {/* 로딩 표시 */}
+        {/* 로딩 인디케이터 */}
         {isLoading && messages[messages.length - 1]?.role === 'user' && (
-          <div className="message-row bot-row">
-            <div className="avatar bot-avatar">🤖</div>
-            <div className="message-bubble bot loading">
-              <div className="loading-spinner"></div>
-              생각 중...
+          <div className="flex gap-3">
+            <div className="w-9 h-9 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center shrink-0 shadow-sm">
+              <Bot size={18} />
+            </div>
+            <div className="bg-white text-gray-500 p-3.5 rounded-2xl rounded-tl-none border border-gray-100 text-sm animate-pulse shadow-sm">
+              답변을 생성하고 있습니다...
             </div>
           </div>
         )}
         <div ref={messagesEndRef} />
       </div>
 
-      {/* 2. 추천 질문 & 입력창 영역 */}
-      <div className="input-section">
+      {/* 입력창 영역 (하단 고정) */}
+      {/* bottom-[60px]: 탭바(TabBar)의 높이(약 60px)만큼 위로 띄웁니다. */}
+      <div className="fixed bottom-[85px] left-0 right-0 max-w-[393px] mx-auto px-4 py-3 bg-white/95 backdrop-blur-sm border-t border-gray-200 z-20 flex flex-col gap-3 transition-all">
+
+        {/* 예시 질문 (초기 상태일 때만 표시) */}
         {messages.length < 3 && (
-          <div className="suggested-questions">
+          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide -mx-1 px-1">
             {suggestedQuestions.map((q, idx) => (
-              <button key={idx} onClick={() => handleSuggestedClick(q)} className="chip">
+              <button
+                key={idx}
+                onClick={() => handleSuggestedClick(q)}
+                className="whitespace-nowrap px-3 py-1.5 bg-blue-50 text-blue-600 text-xs font-medium rounded-full border border-blue-100 hover:bg-blue-100 active:scale-95 transition-all shrink-0"
+              >
                 {q}
               </button>
             ))}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="chat-input-area">
-          <textarea
-            ref={textareaRef}
-            placeholder={`[${schoolCode.toUpperCase()}] 학칙에 대해 질문하세요...`}
+        <form onSubmit={handleSubmit} className="flex gap-2 items-center">
+          <input
+            className="flex-1 px-4 py-3 rounded-full border border-gray-200 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all bg-gray-50"
+            placeholder="메시지를 입력하세요..."
             value={input}
             onChange={handleInputChange}
-            onKeyDown={handleKeyDown}
-            disabled={isLoading}
-            rows={1}
           />
           <button
             type="submit"
-            disabled={isLoading || !input.trim()}
-            className="btn btn-primary send-btn"
+            disabled={!input.trim() || isLoading}
+            className="w-11 h-11 rounded-full bg-blue-600 text-white flex items-center justify-center shrink-0 disabled:bg-gray-300 disabled:cursor-not-allowed transition-all hover:bg-blue-700 shadow-md active:scale-95"
           >
-            전송
+            <Send size={18} />
           </button>
         </form>
       </div>
-
-      {/* ⭐️ UI 디자인 개선을 위한 인라인 CSS */}
-      <style jsx>{`
-        .chat-page-container {
-          max-width: 800px;
-          margin: 0 auto; 
-          background-color: var(--color-white);
-          display: flex;
-          flex-direction: column;
-          height: 100vh; 
-          position: relative;
-        }
-        .chat-actions-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 20px;
-            border-bottom: 1px solid var(--color-border);
-            background-color: var(--color-white);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            z-index: 10;
-        }
-        .chat-window {
-          flex-grow: 1;
-          padding: 20px;
-          overflow-y: auto;
-          background-color: #f9fafb;
-        }
-        .message-row {
-          display: flex;
-          margin-bottom: 16px;
-          align-items: flex-start;
-        }
-        .user-row {
-          justify-content: flex-end;
-        }
-        .bot-row {
-          justify-content: flex-start;
-        }
-        .avatar {
-          width: 36px;
-          height: 36px;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 1.2rem;
-          margin-right: 10px;
-          background-color: #e0e7ff;
-          border: 1px solid #c7d2fe;
-        }
-        .message-bubble {
-          max-width: 75%; 
-          padding: 14px 18px;
-          border-radius: 18px;
-          line-height: 1.6;
-          font-size: 0.95rem;
-          box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-          word-break: break-word;
-          position: relative;
-        }
-        .user {
-          background-color: var(--color-primary); 
-          color: var(--color-white);
-          border-bottom-right-radius: 4px;
-        }
-        .bot {
-          background-color: var(--color-white);
-          color: var(--color-text-primary);
-          border: 1px solid var(--color-border);
-          border-bottom-left-radius: 4px;
-        }
-        .loading {
-          font-style: italic;
-          opacity: 0.8;
-          display: flex;
-          align-items: center;
-          color: #6b7280;
-        }
-        .input-section {
-          background-color: var(--color-white);
-          border-top: 1px solid var(--color-border);
-          padding: 10px 20px 20px;
-        }
-        .suggested-questions {
-          display: flex;
-          gap: 8px;
-          overflow-x: auto;
-          padding-bottom: 10px;
-          margin-bottom: 5px;
-          scrollbar-width: none; /* Firefox */
-        }
-        .suggested-questions::-webkit-scrollbar {
-          display: none; /* Chrome, Safari */
-        }
-        .chip {
-          white-space: nowrap;
-          background-color: #f3f4f6;
-          border: 1px solid #e5e7eb;
-          border-radius: 20px;
-          padding: 6px 12px;
-          font-size: 0.85rem;
-          color: #4b5563;
-          cursor: pointer;
-          transition: all 0.2s;
-        }
-        .chip:hover {
-          background-color: #e5e7eb;
-          color: #1f2937;
-        }
-        .chat-input-area {
-          display: flex;
-          align-items: flex-end;
-          background-color: #f9fafb;
-          border-radius: 24px;
-          padding: 8px 12px;
-          border: 1px solid #e5e7eb;
-        }
-        .chat-input-area:focus-within {
-          border-color: var(--color-primary);
-          box-shadow: 0 0 0 2px rgba(var(--color-primary-rgb), 0.1);
-        }
-        .chat-input-area textarea {
-          flex-grow: 1;
-          padding: 8px 10px;
-          border: none;
-          background: transparent;
-          font-size: 1rem;
-          resize: none;
-          max-height: 150px;
-          outline: none;
-          line-height: 1.5;
-        }
-        .send-btn {
-          border-radius: 20px;
-          padding: 8px 16px;
-          margin-left: 8px;
-          height: 40px;
-          display: flex;
-          align-items: center;
-        }
-        .loading-spinner {
-            border: 2px solid #e5e7eb;
-            border-top: 2px solid var(--color-primary);
-            border-radius: 50%;
-            width: 16px;
-            height: 16px;
-            animation: spin 1s linear infinite;
-            margin-right: 8px;
-        }
-        /* Markdown 스타일링 */
-        .markdown-content {
-          position: relative;
-        }
-        .markdown-content :global(p) {
-            margin: 0 0 10px 0;
-        }
-        .markdown-content :global(p:last-child) {
-            margin-bottom: 0;
-        }
-        .markdown-content :global(strong) {
-            font-weight: 600;
-            color: var(--color-primary-dark);
-        }
-        .markdown-content :global(ul), .markdown-content :global(ol) {
-            margin: 5px 0 10px 20px;
-            padding: 0;
-        }
-        .markdown-content :global(li) {
-            margin-bottom: 4px;
-        }
-        .copy-btn {
-          position: absolute;
-          top: -10px;
-          right: -10px;
-          background: #fff;
-          border: 1px solid #e5e7eb;
-          border-radius: 50%;
-          width: 24px;
-          height: 24px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          cursor: pointer;
-          font-size: 0.8rem;
-          opacity: 0;
-          transition: opacity 0.2s;
-          box-shadow: 0 1px 2px rgba(0,0,0,0.1);
-        }
-        .message-bubble:hover .copy-btn {
-          opacity: 1;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-      `}</style>
     </div>
   );
 }

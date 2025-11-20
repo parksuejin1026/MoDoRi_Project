@@ -1,143 +1,107 @@
-// 📁 app/community/(post-group)/page.tsx (Vercel 안정화 최종 버전)
-
+// 📁 app/community/page.tsx
 import Link from 'next/link';
-import dbConnect from '@/lib/db/mongodb'; 
-import Post from '@/models/Post'; 
-// import { format } from 'date-fns'; // 👈 제거됨
-// import PostDate from '../../../components/PostDate'; // 👈 제거됨
+import dbConnect from '@/lib/db/mongodb';
+import Post from '@/models/Post';
+import { MessageSquare, ThumbsUp, Clock, Plus, ArrowLeft } from 'lucide-react';
 
-// ⭐️ 최종 해결책 1: Next.js에게 빌드 시 사전 렌더링을 막고 런타임에 동적 렌더링(SSR)하도록 강제
-export const dynamic = 'force-dynamic'; 
+export const dynamic = 'force-dynamic';
 
-// [기능 설명] UI에 필요한 데이터 타입 정의
-interface PostDisplayData {
-    _id: string;
-    title: string;
-    author: string;
-    createdAt: string; 
-    views: number;
-}
-
-// [기능 설명] MongoDB Document에서 가져오는 실제 데이터 타입
-interface MongoPost {
-    _id: object; 
-    title: string;
-    content: string;
-    author: string;
-    createdAt: Date; 
-    views: number;
-}
-
-async function getPosts(): Promise<PostDisplayData[]> {
+async function getPosts() {
     try {
         await dbConnect();
-        
-        // 데이터가 없어도 안전하게 처리되도록 .lean() 사용
-        const posts: MongoPost[] = await Post.find({}).sort({ createdAt: -1 }).lean() as MongoPost[]; 
-
-        return posts.map(post => ({
-            _id: post._id.toString(), 
-            title: post.title,
-            author: post.author,
-            views: post.views,
-            // Date 객체를 문자열로 변환하여 렌더링에 사용
-            createdAt: post.createdAt.toISOString(), 
-        })) as PostDisplayData[]; 
-
-    } catch (error: unknown) {
-        console.error("게시글 로드 실패:", error);
-        // DB 연결 실패 시에도 빈 배열 반환하여 런타임 오류 방지
+        const posts = await Post.find({}).sort({ createdAt: -1 }).lean();
+        return JSON.parse(JSON.stringify(posts));
+    } catch (error) {
         return [];
     }
 }
 
 export default async function CommunityPage() {
-    
-    const posts = await getPosts(); 
+    const posts = await getPosts();
 
     return (
-        <div className="community-container" style={{ maxWidth: '900px', margin: '0 auto', padding: '1rem' }}>
-            
-            {/* ⭐️ 모바일 Navigation Bar 스타일의 제목 */}
-            <h1 style={{ fontSize: '1.2rem', fontWeight: 700, padding: '10px 0', borderBottom: '1px solid var(--color-border)', textAlign: 'center' }}>
-                학생 커뮤니티 게시판
-            </h1>
-
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', marginTop: '1rem' }}>
-                <span style={{ fontSize: '0.9rem', color: 'var(--color-text-secondary)' }}>
-                    총 게시글 수: {posts.length}개
-                </span>
-                {/* ⭐️ 글쓰기 버튼 경로: /community/add 로 연결 */}
-                <a href="/community/add" className="btn btn-primary btn-small">
-                    글쓰기
-                </a>
+        <div className="flex-1 overflow-y-auto p-6 pb-24 relative min-h-screen bg-gray-50">
+            {/* 헤더 */}
+            <div className="flex items-center gap-2 mb-4 -ml-2 p-2 text-gray-600">
+                <Link href="/" className="flex items-center gap-2 hover:bg-gray-200 rounded-md px-2 py-1 transition-colors">
+                    <ArrowLeft size={20} />
+                    <span>뒤로가기</span>
+                </Link>
             </div>
 
-            {/* 게시글 목록 UI */}
-            <div className="post-list" style={{ borderTop: '2px solid var(--color-primary)' }}>
-                {/* 공지사항 (임시) */}
-                <div className="post-item notice" style={{ padding: '15px', borderBottom: '1px solid var(--color-border)', backgroundColor: '#f0f4f8', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontWeight: 600, color: 'var(--color-primary)' }}>[공지] 커뮤니티 이용 규칙</span>
-                    <span style={{ color: 'var(--color-text-secondary)', fontSize: '0.8rem' }}>관리자 | 2025.01.01</span>
-                </div>
-                
+            <div className="mb-6">
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">커뮤니티</h2>
+                <p className="text-sm text-gray-500">학칙에 대한 질문과 정보를 공유해보세요</p>
+            </div>
+
+            {/* 카테고리 필터 (UI만 구현) */}
+            <div className="flex gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide">
+                {['전체', '질문', '정보공유', '자유'].map((cat, idx) => (
+                    <button
+                        key={cat}
+                        className={`whitespace-nowrap px-3 py-2 rounded-md text-sm border transition-colors ${idx === 0
+                                ? 'bg-blue-600 text-white border-blue-600'
+                                : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
+                            }`}
+                    >
+                        {cat}
+                    </button>
+                ))}
+            </div>
+
+            {/* 게시글 목록 */}
+            <div className="flex flex-col gap-4">
                 {posts.length > 0 ? (
-                    posts.map((post) => (
-                        // 상세 페이지 경로: /community/[postId] 로 이동
-                        <Link 
-                            href={`/community/${post._id}`} 
-                            key={post._id} 
-                            style={{ display: 'block', padding: '15px', borderBottom: '1px solid var(--color-border)', cursor: 'pointer' }}
+                    posts.map((post: any) => (
+                        <Link
+                            href={`/community/${post._id}`}
+                            key={post._id}
+                            className="block bg-white border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow cursor-pointer"
                         >
-                            <div style={{ fontWeight: 500, color: 'var(--color-text-primary)' }}>
-                                {post.title} 
-                                <span style={{ marginLeft: '10px', fontSize: '0.8rem', color: '#dc2626' }}>({post.views})</span>
-                            </div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: 'var(--color-text-secondary)', marginTop: '5px' }}>
-                                <span>작성자: {post.author}</span>
-                                {/* ⭐️ 최종 해결책 2: 기본 JS 함수로 날짜 포맷팅 */}
-                                <span>
-                                    {new Date(post.createdAt).toLocaleString('ko-KR', { 
-                                        year: '2-digit', 
-                                        month: '2-digit', 
-                                        day: '2-digit', 
-                                        hour: '2-digit', 
-                                        minute: '2-digit'
-                                    })}
+                            <div className="flex items-center gap-2 mb-2">
+                                <span className="px-2 py-1 rounded text-xs font-medium border bg-blue-100 text-blue-600 border-blue-200">
+                                    자유
                                 </span>
+                                <span className="text-xs text-gray-500">동양미래대학교</span>
+                            </div>
+
+                            <h3 className="text-gray-900 font-medium mb-1 truncate">{post.title}</h3>
+                            <p className="text-sm text-gray-500 line-clamp-2 mb-3">{post.content}</p>
+
+                            <div className="flex items-center justify-between pt-3 border-t border-gray-100 text-xs text-gray-500">
+                                <div className="flex items-center gap-4">
+                                    <div className="flex items-center gap-1">
+                                        <ThumbsUp size={14} />
+                                        <span>{post.likes || 0}</span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                        <MessageSquare size={14} />
+                                        <span>{post.views || 0}</span>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                    <Clock size={12} />
+                                    <span>{new Date(post.createdAt).toLocaleDateString()}</span>
+                                </div>
                             </div>
                         </Link>
                     ))
                 ) : (
-                    <div style={{ padding: '20px', textAlign: 'center', color: 'var(--color-text-secondary)', borderBottom: '1px solid var(--color-border)' }}>
-                        작성된 게시글이 없습니다. **'글쓰기'** 버튼을 눌러 첫 글을 작성해 보세요!
+                    <div className="text-center py-20 text-gray-500">
+                        <MessageSquare size={48} className="mx-auto mb-3 opacity-30" />
+                        <p>아직 작성된 글이 없습니다</p>
+                        <p className="text-sm">첫 번째 글을 작성해보세요!</p>
                     </div>
                 )}
             </div>
-            
-            {/* ⭐️ 모바일 UX: FAB (Floating Action Button) 영역 */}
-            <Link href="/community/add" passHref legacyBehavior>
-                <a style={{
-                    position: 'fixed',
-                    bottom: '80px', 
-                    right: '20px',
-                    width: '56px',
-                    height: '56px',
-                    borderRadius: '50%',
-                    backgroundColor: 'var(--color-primary-dark)',
-                    color: 'var(--color-white)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '2rem',
-                    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.4)',
-                    zIndex: 999,
-                    fontWeight: 'bold',
-                }}>
-                    +
-                </a>
+
+            {/* 글쓰기 버튼 (FAB) */}
+            <Link
+                href="/community/add"
+                className="fixed bottom-24 right-6 w-14 h-14 bg-blue-600 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-blue-700 transition-colors z-50"
+            >
+                <Plus size={24} />
             </Link>
-            
         </div>
     );
 }
