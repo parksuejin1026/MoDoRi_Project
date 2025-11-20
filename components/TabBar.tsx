@@ -16,12 +16,12 @@ export default function TabBar() {
     const pathname = usePathname();
 
     return (
-        <nav 
+        <nav
             style={{
                 position: 'fixed',
                 bottom: 0,
                 width: '100%',
-                maxWidth: '500px', // 모바일 컨테이너 너비와 일치
+                maxWidth: '500px',
                 height: '60px',
                 backgroundColor: 'var(--color-white)',
                 borderTop: '1px solid var(--color-border)',
@@ -32,13 +32,11 @@ export default function TabBar() {
             }}
         >
             {tabs.map((tab) => {
-                // ⭐️ [기능 설명] 현재 경로를 기준으로 활성 탭을 판단합니다.
-                // /chat/code 경로도 /select-school 탭을 활성화시키도록 처리합니다.
                 const isActive = pathname === tab.path || (pathname.startsWith('/chat/') && tab.path === '/select-school') || (pathname.startsWith('/community') && tab.path === '/community');
-                
+
                 return (
                     <Link href={tab.path} key={tab.name} passHref legacyBehavior>
-                        <a 
+                        <a
                             style={{
                                 display: 'flex',
                                 flexDirection: 'column',
