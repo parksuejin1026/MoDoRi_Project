@@ -1,47 +1,35 @@
-// 📁 components/DeleteButton.tsx
-
+// components/DeleteButton.tsx
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { Trash2 } from 'lucide-react';
 
-interface DeleteButtonProps {
-    postId: string;
-}
-
-export default function DeleteButton({ postId }: DeleteButtonProps) {
+export default function DeleteButton({ postId }: { postId: string }) {
     const router = useRouter();
 
     const handleDelete = async () => {
-        if (!confirm('정말로 이 게시글을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
-            return;
-        }
+        if (!confirm('정말로 삭제하시겠습니까?')) return;
 
         try {
-            // DELETE API 호출: /api/community/[id]
-            const response = await fetch(`/api/community/${postId}`, {
-                method: 'DELETE',
-            });
-
-            if (response.ok) {
-                alert('게시글이 성공적으로 삭제되었습니다.');
-                router.push('/community'); // 목록 페이지로 리다이렉트
+            const res = await fetch(`/api/community/${postId}`, { method: 'DELETE' });
+            if (res.ok) {
+                router.push('/community');
+                router.refresh();
             } else {
-                const errorData = await response.json();
-                alert(`삭제 실패: ${errorData.error || response.statusText}`);
+                alert('삭제 실패');
             }
-
         } catch (error) {
-            console.error('삭제 중 통신 오류:', error);
-            alert('삭제 중 서버와 통신 오류가 발생했습니다.');
+            console.error(error);
+            alert('오류 발생');
         }
     };
 
     return (
-        <button 
-            onClick={handleDelete} 
-            className="btn btn-outline" 
-            style={{ borderColor: '#dc2626', color: '#dc2626' }}
+        <button
+            onClick={handleDelete}
+            className="flex items-center gap-1 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
         >
+            <Trash2 size={16} />
             삭제
         </button>
     );
