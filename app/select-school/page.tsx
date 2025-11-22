@@ -1,11 +1,28 @@
-// 📁 app/select-school/page.tsx (학교 선택 진입 페이지)
+'use client';
 
-// [기능 설명] 이 페이지는 서버 컴포넌트이며, 정적인 데이터 로딩과 SEO 관리에 유리합니다.
-// 실제 UI 및 사용자 상호작용은 SchoolSelector.tsx에서 처리합니다.
+import { Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
+import SchoolSelector from '@/components/SchoolSelector';
 
-import SchoolSelector from '@/components/SchoolSelector'; // ⭐️ SchoolSelector 컴포넌트 import
+function SchoolSelectContent() {
+    const searchParams = useSearchParams();
+    const from = searchParams.get('from');
+
+    // 프로필에서 왔다면(from=profile) 수정 모드를 켭니다.
+    const isFromProfile = from === 'profile';
+    const backUrl = isFromProfile ? '/profile' : '/';
+
+    return <SchoolSelector backUrl={backUrl} isEditMode={isFromProfile} />;
+}
 
 export default function SelectSchoolPage() {
-    // [기능 설명] SchoolSelector 컴포넌트를 렌더링합니다.
-    return <SchoolSelector />;
+    return (
+        <main className="min-h-screen bg-gray-50 flex flex-col">
+            <div className="max-w-[393px] mx-auto w-full bg-white min-h-screen flex flex-col shadow-sm">
+                <Suspense fallback={<div>로딩 중...</div>}>
+                    <SchoolSelectContent />
+                </Suspense>
+            </div>
+        </main>
+    );
 }

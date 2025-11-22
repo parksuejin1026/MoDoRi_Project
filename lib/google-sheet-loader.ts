@@ -1,89 +1,79 @@
-// 📁 lib/google-sheet-loader.ts (Google Sheets 데이터 로딩 유틸리티)
-
+// 📁 lib/google-sheet-loader.ts
 import { google } from 'googleapis';
 
-const API_KEY = process.env.GOOGLE_SHEETS_API_KEY;
-const SHEET_ID = process.env.GOOGLE_SHEETS_ID;
+// 1. 환경 변수 로드
+const CLIENT_EMAIL = process.env.GOOGLE_CLIENT_EMAIL;
+const PRIVATE_KEY = process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n');
+const SHEET_ID = process.env.GOOGLE_SHEETS_ID_RULES;
 
-const sheets = google.sheets({ version: 'v4', auth: API_KEY });
+const auth = new google.auth.GoogleAuth({
+  credentials: {
+    client_email: CLIENT_EMAIL,
+    private_key: PRIVATE_KEY,
+  },
+  scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+});
 
-// [기능 설명] 학교 코드를 Sheets에 저장된 실제 한글 탭 이름으로 매핑합니다.
+const sheets = google.sheets({ version: 'v4', auth });
+
 function mapCodeToKoreanName(code: string): string {
   switch (code.toLowerCase()) {
-    case 'dongyang':
-      return '동양미래대학교';
-    case 'hanyang':
-      return '한양대학교';
-    case 'seoultech':
-      return '서울과학기술대학교';
-    case 'ansan':
-      return '안산대학교';
-    case 'soonchunhyang': // ⭐️ 순천향대학교 추가
-      return '순천향대학교';
-    default:
-      return '';
+    case 'dongyang': return '동양미래대학교';
+    case 'hanyang': return '한양대학교';
+    case 'seoultech': return '서울과학기술대학교';
+    case 'ansan': return '안산대학교';
+    case 'soonchunhyang': return '순천향대학교';
+    default: return '';
   }
 }
 
-// ⭐️ 간단한 인메모리 캐시 구현 (TTL: 1시간)
 interface CacheEntry {
   data: string;
   timestamp: number;
 }
-
-const CACHE_TTL = 60 * 60 * 1000; // 1시간
+const CACHE_TTL = 60 * 60 * 1000;
 const ruleCache = new Map<string, CacheEntry>();
 
 export async function loadRuleDataFromSheet(schoolCode: string): Promise<string> {
-  if (!API_KEY || !SHEET_ID) {
-    console.error("Google Sheets API Key or Sheet ID is missing.");
-    return "Error: Sheets API 설정을 확인하세요.";
+  // 🚨 ID가 없으면 아예 실행하지 않고 에러 반환
+  if (!SHEET_ID) {
+    console.error("❌ [Critical] GOOGLE_SHEET_ID_RULES 환경 변수가 없습니다.");
+    return "Error: 서버 설정 오류(학칙 시트 ID 누락). 관리자에게 문의하세요.";
   }
 
-  // 1. 학교 코드에서 정확한 한글 탭 이름을 얻습니다.
   const koreanName = mapCodeToKoreanName(schoolCode);
 
   if (!koreanName) {
     return `Error: 지원하지 않는 학교 코드(${schoolCode})입니다.`;
   }
 
-  // ⭐️ 캐시 확인
   const now = Date.now();
   const cachedEntry = ruleCache.get(schoolCode);
-
   if (cachedEntry && (now - cachedEntry.timestamp < CACHE_TTL)) {
-    console.log(`[Cache Hit] ${schoolCode} (${koreanName}) 학칙 데이터를 캐시에서 불러옵니다.`);
+    console.log(`[Cache Hit] ${koreanName} 학칙 데이터를 캐시에서 불러옵니다.`);
     return cachedEntry.data;
   }
 
-  console.log(`[Cache Miss] ${schoolCode} (${koreanName}) 학칙 데이터를 Google Sheets에서 새로 가져옵니다.`);
-
-  // 2. 탭 이름과 A1 셀을 결합하여 RANGE 문자열을 만듭니다.
-  const range = `${koreanName}!A1`;
+  console.log(`[Cache Miss] ${koreanName} 학칙 데이터를 Google Sheets에서 새로 가져옵니다.`);
 
   try {
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId: SHEET_ID,
-      range: range,
+      range: `${koreanName}!A1`,
     });
 
     const ruleText = response.data.values?.[0]?.[0];
 
     if (!ruleText || typeof ruleText !== 'string') {
-      console.error(`Google Sheets에서 학칙 텍스트를 찾을 수 없거나 데이터가 비어 있습니다. (탭: ${koreanName})`);
+      console.error(`[Loader Error] ${koreanName} 탭의 A1 셀이 비어있거나 데이터를 읽을 수 없습니다.`);
       return `Error: 학칙 데이터 시트 (${koreanName} 탭 A1 셀)에 내용이 비어 있습니다.`;
     }
 
-    // ⭐️ 캐시 저장
-    ruleCache.set(schoolCode, {
-      data: ruleText,
-      timestamp: now
-    });
-
+    ruleCache.set(schoolCode, { data: ruleText, timestamp: now });
     return ruleText;
 
   } catch (error) {
-    console.error(`Google Sheets API 호출 중 오류 발생 (RANGE: ${range}): ${error}`);
-    return `Error: Sheets API 통신 오류 발생. (요청 범위: ${range}). 탭 이름, API 키, 공유 설정을 확인하세요.`;
+    console.error(`Google Sheets API 호출 중 오류 발생 (${koreanName}):`, error);
+    return `Error: 학칙 데이터를 불러오는데 실패했습니다. (구글 시트 권한, 시트 ID, 탭 이름을 확인하세요)`;
   }
 }
