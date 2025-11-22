@@ -1,3 +1,4 @@
+// 📁 app/profile/page.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -79,8 +80,10 @@ export default function ProfilePage() {
 
     const MenuSection = ({ title, children }: { title: string, children: React.ReactNode }) => (
         <div className="mb-6">
-            <div className="text-sm font-semibold text-gray-500 mb-3 pl-2">{title}</div>
-            <div className="bg-white rounded-xl overflow-hidden border border-gray-200 shadow-sm">
+            {/* ⭐️ [수정] 텍스트 색상 테마 변수 적용 */}
+            <div className="text-sm font-semibold text-muted-foreground mb-3 pl-2">{title}</div>
+            {/* ⭐️ [수정] 배경/경계 색상 테마 변수 적용 */}
+            <div className="bg-card rounded-xl overflow-hidden border border-border shadow-sm">
                 {children}
             </div>
         </div>
@@ -89,42 +92,45 @@ export default function ProfilePage() {
     const MenuItem = ({ icon: Icon, text, onClick, isDanger = false }: any) => (
         <div
             onClick={onClick}
-            className={`flex items-center justify-between p-4 border-b border-gray-100 last:border-0 cursor-pointer transition-colors hover:bg-gray-50 active:bg-gray-100`}
+            // ⭐️ [수정] 배경/경계/텍스트 색상 테마 변수 적용
+            className={`flex items-center justify-between p-4 border-b border-border last:border-0 cursor-pointer transition-colors hover:bg-accent active:bg-accent/50`}
         >
             <div className="flex items-center gap-3">
-                <Icon size={20} className={isDanger ? "text-red-500" : "text-gray-500"} />
-                <span className={`text-sm font-medium ${isDanger ? "text-red-500" : "text-gray-700"}`}>{text}</span>
+                <Icon size={20} className={isDanger ? "text-red-500" : "text-muted-foreground"} />
+                <span className={`text-sm font-medium ${isDanger ? "text-red-500" : "text-foreground"}`}>{text}</span>
             </div>
-            <ChevronRight size={20} className="text-gray-400" />
+            <ChevronRight size={20} className="text-muted-foreground" />
         </div>
     );
 
     return (
-        <main className="flex-1 p-6 pb-24 bg-gray-50 min-h-screen relative">
+        // ⭐️ [수정] 배경 색상 테마 변수 적용
+        <main className="flex-1 p-6 pb-24 bg-background min-h-screen relative">
             <div className="max-w-[393px] mx-auto">
                 {/* 헤더 */}
                 <div className="mb-8">
-                    <h2 className="text-2xl font-bold text-gray-800 mb-2">프로필</h2>
-                    <p className="text-sm text-gray-500">계정 정보 및 설정을 관리하세요</p>
+                    <h2 className="text-2xl font-bold text-foreground mb-2">프로필</h2>
+                    <p className="text-sm text-muted-foreground">계정 정보 및 설정을 관리하세요</p>
                 </div>
 
                 {/* 프로필 카드 */}
-                <div className="bg-white rounded-xl p-6 mb-6 shadow-sm border border-gray-200">
+                {/* ⭐️ [수정] 카드 테마 변수 적용 */}
+                <div className="bg-card rounded-xl p-6 mb-6 shadow-sm border border-border">
                     <div className="flex items-center gap-4 mb-6">
                         <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-600 to-violet-600 flex items-center justify-center text-white text-2xl font-semibold shadow-md">
                             {avatarLetter}
                         </div>
                         <div>
-                            <div className="text-xl font-bold text-gray-800 mb-1">{userName}</div>
-                            <div className="text-sm text-gray-500">{userId}</div>
+                            <div className="text-xl font-bold text-foreground mb-1">{userName}</div>
+                            <div className="text-sm text-muted-foreground">{userId}</div>
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-3 gap-4 pt-6 border-t border-gray-100">
+                    <div className="grid grid-cols-3 gap-4 pt-6 border-t border-border">
                         {['작성한 글', '댓글', '좋아요'].map((label) => (
                             <div key={label} className="text-center">
-                                <div className="text-2xl font-bold text-blue-600 mb-1">0</div>
-                                <div className="text-xs text-gray-500">{label}</div>
+                                <div className="text-2xl font-bold text-primary mb-1">0</div>
+                                <div className="text-xs text-muted-foreground">{label}</div>
                             </div>
                         ))}
                     </div>
@@ -147,32 +153,34 @@ export default function ProfilePage() {
 
                 <div className="mt-8">
                     <div className="text-sm font-semibold text-red-500 mb-3 pl-2">위험 영역</div>
-                    <div className="bg-white rounded-xl overflow-hidden border border-red-100 shadow-sm">
+                    {/* ⭐️ [수정] 배경/경계 색상 테마 변수 적용 */}
+                    <div className="bg-card rounded-xl overflow-hidden border border-red-100 shadow-sm">
                         <MenuItem icon={LogOut} text="로그아웃" onClick={handleLogout} isDanger />
                         <MenuItem icon={Trash2} text="계정 탈퇴" onClick={onClickDelete} isDanger />
                     </div>
                 </div>
 
-                <div className="text-center mt-8 p-4 text-xs text-gray-400">
-                    룰룩 Rule-Look v1.0.0
+                <div className="text-center mt-8 p-4 text-xs text-muted-foreground">
+                    룰룩 Rule-Look v1.0.3
                 </div>
             </div>
 
             {/* 탈퇴 확인 모달 (입력 폼이 있어서 전역 모달 대신 로컬 모달 유지) */}
             {isDeleteModalOpen && (
                 <div className="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center p-4">
-                    <div className="bg-white rounded-2xl w-full max-w-[320px] p-6 shadow-xl animate-in fade-in zoom-in duration-200">
+                    {/* ⭐️ [수정] 모달 배경 색상 테마 변수 적용 */}
+                    <div className="bg-card rounded-2xl w-full max-w-[320px] p-6 shadow-xl animate-in fade-in zoom-in duration-200">
                         <div className="flex justify-between items-start mb-4">
-                            <h3 className="text-lg font-bold text-gray-900">계정 탈퇴</h3>
+                            <h3 className="text-lg font-bold text-foreground">계정 탈퇴</h3>
                             <button
                                 onClick={() => setIsDeleteModalOpen(false)}
-                                className="text-gray-400 hover:text-gray-600"
+                                className="text-muted-foreground hover:text-foreground"
                             >
                                 <X size={20} />
                             </button>
                         </div>
 
-                        <p className="text-sm text-gray-600 mb-4 leading-relaxed">
+                        <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
                             탈퇴 시 모든 정보가 삭제되며 복구할 수 없습니다.<br />
                             본인 확인을 위해 비밀번호를 입력해주세요.
                         </p>
@@ -181,7 +189,8 @@ export default function ProfilePage() {
                             <input
                                 type="password"
                                 placeholder="비밀번호 입력"
-                                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/10 transition-all"
+                                // ⭐️ [수정] 입력창 테마 변수 적용
+                                className="w-full px-4 py-3 border border-border rounded-xl text-sm focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/10 transition-all bg-muted text-foreground"
                                 value={deletePassword}
                                 onChange={(e) => setDeletePassword(e.target.value)}
                             />
@@ -189,7 +198,8 @@ export default function ProfilePage() {
                             <div className="flex gap-2">
                                 <button
                                     onClick={() => setIsDeleteModalOpen(false)}
-                                    className="flex-1 py-3 text-sm font-medium text-gray-600 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors"
+                                    // ⭐️ [수정] 버튼 테마 변수 적용
+                                    className="flex-1 py-3 text-sm font-medium text-foreground bg-muted rounded-xl hover:bg-muted/70 transition-colors"
                                 >
                                     취소
                                 </button>

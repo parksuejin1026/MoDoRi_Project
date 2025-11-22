@@ -63,25 +63,30 @@ export function GlobalModalProvider({ children }: { children: ReactNode }) {
         <GlobalModalContext.Provider value={{ showAlert, showConfirm }}>
             {children}
 
-            {/* 모달 UI (계정 탈퇴 모달 디자인 적용) */}
+            {/* 모달 UI (다크 모드 스타일 적용) */}
             {modal.isOpen && (
                 <div className="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center p-4 animate-in fade-in duration-200">
-                    <div className="bg-white rounded-2xl w-full max-w-[320px] p-6 shadow-xl animate-in zoom-in-95 duration-200">
+                    {/* ⭐️ [수정] 배경 색상 테마 변수 적용 (bg-card) */}
+                    <div className="bg-card rounded-2xl w-full max-w-[320px] p-6 shadow-xl animate-in zoom-in-95 duration-200">
 
                         {/* 헤더 */}
                         <div className="flex justify-between items-start mb-4">
-                            <h3 className={`text-lg font-bold ${modal.isDanger ? 'text-red-600' : 'text-gray-900'} flex items-center gap-2`}>
+                            {/* ⭐️ [수정] 텍스트 색상 테마 변수 적용 (text-foreground) */}
+                            <h3 className={`text-lg font-bold ${modal.isDanger ? 'text-red-600' : 'text-foreground'} flex items-center gap-2`}>
                                 {modal.isDanger && <AlertCircle size={20} />}
-                                {!modal.isDanger && modal.type === 'alert' && <CheckCircle2 size={20} className="text-blue-600" />}
+                                {/* ⭐️ [수정] 알림 아이콘 색상에 primary 변수 적용 */}
+                                {!modal.isDanger && modal.type === 'alert' && <CheckCircle2 size={20} className="text-primary" />}
                                 {modal.title}
                             </h3>
-                            <button onClick={handleCancel} className="text-gray-400 hover:text-gray-600 transition-colors">
+                            {/* ⭐️ [수정] 닫기 버튼 색상 테마 변수 적용 (text-muted-foreground) */}
+                            <button onClick={handleCancel} className="text-muted-foreground hover:text-foreground transition-colors">
                                 <X size={20} />
                             </button>
                         </div>
 
                         {/* 본문 */}
-                        <p className="text-sm text-gray-600 mb-6 leading-relaxed whitespace-pre-wrap">
+                        {/* ⭐️ [수정] 텍스트 색상 테마 변수 적용 (text-muted-foreground) */}
+                        <p className="text-sm text-muted-foreground mb-6 leading-relaxed whitespace-pre-wrap">
                             {modal.message}
                         </p>
 
@@ -90,16 +95,18 @@ export function GlobalModalProvider({ children }: { children: ReactNode }) {
                             {modal.type === 'confirm' && (
                                 <button
                                     onClick={handleCancel}
-                                    className="flex-1 py-3 text-sm font-medium text-gray-600 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors"
+                                    // ⭐️ [수정] 취소 버튼 테마 변수 적용 (bg-muted, text-foreground)
+                                    className="flex-1 py-3 text-sm font-medium text-foreground bg-muted rounded-xl hover:bg-muted/70 transition-colors"
                                 >
                                     취소
                                 </button>
                             )}
                             <button
                                 onClick={handleConfirm}
-                                className={`flex-1 py-3 text-sm font-bold text-white rounded-xl shadow-lg transition-colors ${modal.isDanger
-                                        ? 'bg-red-500 hover:bg-red-600 shadow-red-500/20'
-                                        : 'bg-blue-600 hover:bg-blue-700 shadow-blue-600/20'
+                                // ⭐️ [수정] 확인/경고 버튼 테마 변수 적용 (primary/red)
+                                className={`flex-1 py-3 text-sm font-bold text-primary-foreground rounded-xl shadow-lg transition-colors ${modal.isDanger
+                                    ? 'bg-red-500 hover:bg-red-600 shadow-red-500/20'
+                                    : 'bg-primary hover:bg-primary/90 shadow-primary/20'
                                     }`}
                             >
                                 확인

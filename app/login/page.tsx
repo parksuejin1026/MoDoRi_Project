@@ -1,3 +1,4 @@
+// 📁 app/login/page.tsx
 'use client';
 
 import { useState } from 'react';
@@ -5,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { BookOpen } from 'lucide-react';
 import { useGlobalModal } from '@/components/GlobalModal';
+import ThemeToggle from '@/components/ThemeToggle'; // ⭐️ [추가] ThemeToggle 임포트
 
 export default function LoginPage() {
     const router = useRouter();
@@ -53,23 +55,29 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="min-h-screen flex flex-col justify-center items-center p-6 bg-gradient-to-br from-blue-600 to-blue-700">
-            <div className="w-full max-w-[360px] bg-white rounded-2xl p-8 shadow-xl">
-                <div className="text-center mb-8">
-                    <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 text-white">
+        <div className="min-h-screen flex flex-col justify-center items-center p-6 bg-background">
+            {/* ⭐️ [수정] 배경 색상 테마 변수 적용 및 relative 추가 */}
+            <div className="w-full max-w-[360px] bg-card rounded-xl border border-border shadow-sm p-6 relative">
+
+                <div className="text-center mb-8 pt-4">
+                    {/* ⭐️ [수정] 버튼 색상 테마 변수 적용 */}
+                    <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mx-auto mb-4 text-primary-foreground">
                         <BookOpen size={32} />
                     </div>
-                    <h1 className="text-3xl font-bold text-blue-600 mb-1">룰룩</h1>
-                    <p className="text-sm text-gray-500">Rule-Look</p>
+                    {/* ⭐️ [수정] 텍스트 색상 테마 변수 적용 */}
+                    <h1 className="text-3xl font-bold text-primary mb-1">룰룩</h1>
+                    <p className="text-sm text-muted-foreground">Rule-Look</p>
                 </div>
 
                 <form onSubmit={handleLogin} className="flex flex-col gap-5">
                     <div className="flex flex-col gap-2">
-                        <label htmlFor="userid" className="text-sm font-medium text-gray-700">아이디</label>
+                        {/* ⭐️ [수정] 텍스트 색상 테마 변수 적용 */}
+                        <label htmlFor="userid" className="text-sm font-medium text-foreground">아이디</label>
                         <input
                             id="userid"
                             type="text"
-                            className="w-full px-4 py-3 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-600 transition-all"
+                            // ⭐️ [수정] 입력창 테마 변수 적용
+                            className="w-full px-4 py-3 border border-border rounded-lg text-sm focus:outline-none focus:border-primary transition-all bg-muted text-foreground"
                             placeholder="아이디를 입력하세요"
                             value={userid}
                             onChange={(e) => setUserid(e.target.value)}
@@ -78,12 +86,13 @@ export default function LoginPage() {
 
                     <div className="flex flex-col gap-2">
                         <div className="flex justify-between items-center">
-                            <label htmlFor="password" className="text-sm font-medium text-gray-700">비밀번호</label>
-                            {/* ⭐️ 비밀번호 찾기 버튼 추가 */}
+                            {/* ⭐️ [수정] 텍스트 색상 테마 변수 적용 */}
+                            <label htmlFor="password" className="text-sm font-medium text-foreground">비밀번호</label>
+                            {/* ⭐️ [수정] 텍스트 색상 테마 변수 적용 */}
                             <button
                                 type="button"
                                 onClick={handleForgotPassword}
-                                className="text-xs text-blue-600 hover:text-blue-800 hover:underline transition-colors"
+                                className="text-xs text-primary hover:text-primary/70 hover:underline transition-colors"
                             >
                                 비밀번호를 잊으셨나요?
                             </button>
@@ -91,20 +100,21 @@ export default function LoginPage() {
                         <input
                             id="password"
                             type="password"
-                            className="w-full px-4 py-3 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-600 transition-all"
+                            // ⭐️ [수정] 입력창 테마 변수 적용
+                            className="w-full px-4 py-3 border border-border rounded-lg text-sm focus:outline-none focus:border-primary transition-all bg-muted text-foreground"
                             placeholder="비밀번호를 입력하세요"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                         />
                     </div>
 
-                    <button type="submit" className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors mt-2">
+                    <button type="submit" className="w-full py-3.5 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-lg transition-colors mt-2">
                         로그인
                     </button>
                 </form>
 
-                <div className="text-center mt-6 text-sm text-gray-500">
-                    아직 계정이 없으신가요? <Link href="/signup" className="text-blue-600 font-semibold hover:underline">회원가입</Link>
+                <div className="text-center mt-6 text-sm text-muted-foreground">
+                    아직 계정이 없으신가요? <Link href="/signup" className="text-primary font-semibold hover:underline">회원가입</Link>
                 </div>
             </div>
         </div>

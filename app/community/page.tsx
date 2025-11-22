@@ -20,12 +20,14 @@ export default async function CommunityPage() {
     const posts = await getPosts();
 
     return (
-        <div className="flex-1 overflow-y-auto p-6 pb-24 relative min-h-screen bg-gray-50">
+        // ⭐️ [수정] 배경 색상 테마 변수 적용
+        <div className="flex-1 overflow-y-auto p-6 pb-24 relative min-h-screen bg-background">
 
             {/* 타이틀 영역 */}
             <div className="mb-8">
-                <h2 className="text-2xl font-bold text-gray-800 mb-2">커뮤니티</h2>
-                <p className="text-sm text-gray-500">학칙에 대한 질문과 정보를 공유해보세요</p>
+                {/* ⭐️ [수정] 텍스트 색상 테마 변수 적용 */}
+                <h2 className="text-2xl font-bold text-foreground mb-2">커뮤니티</h2>
+                <p className="text-sm text-muted-foreground">학칙에 대한 질문과 정보를 공유해보세요</p>
             </div>
 
             {/* 카테고리 필터 */}
@@ -34,8 +36,9 @@ export default async function CommunityPage() {
                     <button
                         key={cat}
                         className={`whitespace-nowrap px-3 py-2 rounded-md text-sm border transition-colors shadow-sm ${idx === 0
-                            ? 'bg-blue-600 text-white border-blue-600'
-                            : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-100'
+                            ? 'bg-primary text-primary-foreground border-primary'
+                            // ⭐️ [수정] 배경/경계/텍스트 색상 테마 변수 적용
+                            : 'bg-card text-foreground border-border hover:bg-accent'
                             }`}
                     >
                         {cat}
@@ -50,19 +53,24 @@ export default async function CommunityPage() {
                         <Link
                             href={`/community/${post._id}`}
                             key={post._id}
-                            className="block bg-white border border-gray-200 rounded-xl p-4 hover:shadow-md transition-all cursor-pointer active:scale-[0.99]"
+                            // ⭐️ [수정] 카드 테마 변수 적용
+                            className="block bg-card border border-border rounded-xl p-4 hover:shadow-md transition-all cursor-pointer active:scale-[0.99]"
                         >
                             <div className="flex items-center gap-2 mb-2">
+                                {/* 배지 색상은 유지 */}
                                 <span className="px-2 py-1 rounded text-xs font-medium border bg-blue-50 text-blue-600 border-blue-200">
                                     자유
                                 </span>
-                                <span className="text-xs text-gray-500">동양미래대학교</span>
+                                {/* ⭐️ [수정] 텍스트 색상 테마 변수 적용 */}
+                                <span className="text-xs text-muted-foreground">동양미래대학교</span>
                             </div>
 
-                            <h3 className="text-gray-900 font-medium mb-1 truncate">{post.title}</h3>
-                            <p className="text-sm text-gray-500 line-clamp-2 mb-3">{post.content}</p>
+                            {/* ⭐️ [수정] 텍스트 색상 테마 변수 적용 */}
+                            <h3 className="text-foreground font-medium mb-1 truncate">{post.title}</h3>
+                            <p className="text-sm text-muted-foreground line-clamp-2 mb-3">{post.content}</p>
 
-                            <div className="flex items-center justify-between pt-3 border-t border-gray-100 text-xs text-gray-500">
+                            {/* ⭐️ [수정] 경계선/텍스트 색상 테마 변수 적용 */}
+                            <div className="flex items-center justify-between pt-3 border-t border-border text-xs text-muted-foreground">
                                 <div className="flex items-center gap-4">
                                     <div className="flex items-center gap-1">
                                         <ThumbsUp size={14} />
@@ -81,7 +89,8 @@ export default async function CommunityPage() {
                         </Link>
                     ))
                 ) : (
-                    <div className="text-center py-20 text-gray-500">
+                    // ⭐️ [수정] 배경/텍스트 색상 테마 변수 적용
+                    <div className="text-center py-20 text-muted-foreground bg-card rounded-xl border border-border border-dashed">
                         <MessageSquare size={48} className="mx-auto mb-3 opacity-30" />
                         <p>아직 작성된 글이 없습니다</p>
                         <p className="text-sm">첫 번째 글을 작성해보세요!</p>
@@ -89,12 +98,10 @@ export default async function CommunityPage() {
                 )}
             </div>
 
-            {/* ⭐️ [수정] 글쓰기 버튼 (FAB) - Fixed Wrapper 패턴 적용 */}
-            {/* 1. Wrapper: Fixed로 뷰포트에 고정하되, App의 max-width에 맞춰 중앙 정렬 */}
+            {/* 글쓰기 버튼 (FAB) - 색상 유지 */}
             <div className="fixed bottom-0 inset-x-0 max-w-[393px] mx-auto z-50 pointer-events-none">
                 <Link
                     href="/community/add"
-                    // 2. Button: Absolute로 Wrapper의 오른쪽 하단에 정확히 배치 (bottom-20 유지)
                     className="absolute bottom-20 right-6 w-14 h-14 bg-blue-600 text-white rounded-full flex items-center justify-center shadow-lg shadow-blue-600/30 hover:bg-blue-700 transition-all active:scale-90 pointer-events-auto"
                 >
                     <Plus size={24} />
