@@ -13,28 +13,31 @@ export default function TabBar() {
 
     const tabs = [
         { name: '홈', path: '/', icon: Home },
-        // ⭐️ 경로 변경: /select-school -> /chat
         { name: '챗봇', path: '/chat', activePath: '/chat', icon: MessageCircle },
         { name: '커뮤니티', path: '/community', activePath: '/community', icon: Users },
         { name: '프로필', path: '/profile', activePath: '/profile', icon: User },
     ];
 
     return (
-        <nav className="fixed bottom-0 left-0 right-0 max-w-[393px] mx-auto bg-white border-t border-border px-6 py-3 z-50">
+        // ⭐️ py-2로 줄여서 탭바를 얇게 만듦 + safe-area-pb 추가
+        <nav className="fixed bottom-0 left-0 right-0 max-w-[393px] mx-auto bg-white border-t border-gray-100 px-6 py-2 z-50 safe-area-pb">
             <div className="flex justify-around items-center">
                 {tabs.map((tab) => {
                     const isActive = pathname === tab.path || (tab.activePath && pathname.startsWith(tab.activePath));
                     const Icon = tab.icon;
 
                     return (
-                        <Link key={tab.name} href={tab.path} className="flex flex-col items-center gap-1 cursor-pointer no-underline">
+                        <Link key={tab.name} href={tab.path} className="flex flex-col items-center gap-0.5 cursor-pointer no-underline w-16">
+                            {/* 아이콘 감싸는 박스 크기 축소 */}
                             <div
-                                className={`p-2 rounded-lg transition-colors ${isActive ? 'bg-blue-50 text-primary' : 'text-gray-400 hover:text-gray-600'
+                                className={`p-1.5 rounded-xl transition-all duration-200 ${isActive ? 'bg-blue-50 text-blue-600 scale-105' : 'text-gray-400 hover:text-gray-600'
                                     }`}
                             >
-                                <Icon size={24} />
+                                {/* 아이콘 크기 24 -> 22로 축소 */}
+                                <Icon size={22} strokeWidth={isActive ? 2.5 : 2} />
                             </div>
-                            <span className={`text-[11px] ${isActive ? 'text-primary font-medium' : 'text-gray-400'}`}>
+                            {/* 텍스트 크기 축소 */}
+                            <span className={`text-[10px] font-medium tracking-tight ${isActive ? 'text-blue-600' : 'text-gray-400'}`}>
                                 {tab.name}
                             </span>
                         </Link>

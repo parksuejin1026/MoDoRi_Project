@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import dbConnect from '@/lib/db/mongodb';
 import Post from '@/models/Post';
-import { MessageSquare, ThumbsUp, Clock, Plus, ArrowLeft } from 'lucide-react';
+import { MessageSquare, ThumbsUp, Clock, Plus } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,27 +21,21 @@ export default async function CommunityPage() {
 
     return (
         <div className="flex-1 overflow-y-auto p-6 pb-24 relative min-h-screen bg-gray-50">
-            {/* 헤더 */}
-            <div className="flex items-center gap-2 mb-4 -ml-2 p-2 text-gray-600">
-                <Link href="/" className="flex items-center gap-2 hover:bg-gray-200 rounded-md px-2 py-1 transition-colors">
-                    <ArrowLeft size={20} />
-                    <span>뒤로가기</span>
-                </Link>
-            </div>
 
-            <div className="mb-6">
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">커뮤니티</h2>
+            {/* 타이틀 영역 */}
+            <div className="mb-8">
+                <h2 className="text-2xl font-bold text-gray-800 mb-2">커뮤니티</h2>
                 <p className="text-sm text-gray-500">학칙에 대한 질문과 정보를 공유해보세요</p>
             </div>
 
-            {/* 카테고리 필터 (UI만 구현) */}
+            {/* 카테고리 필터 */}
             <div className="flex gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide">
                 {['전체', '질문', '정보공유', '자유'].map((cat, idx) => (
                     <button
                         key={cat}
-                        className={`whitespace-nowrap px-3 py-2 rounded-md text-sm border transition-colors ${idx === 0
-                                ? 'bg-blue-600 text-white border-blue-600'
-                                : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
+                        className={`whitespace-nowrap px-3 py-2 rounded-md text-sm border transition-colors shadow-sm ${idx === 0
+                            ? 'bg-blue-600 text-white border-blue-600'
+                            : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-100'
                             }`}
                     >
                         {cat}
@@ -56,10 +50,10 @@ export default async function CommunityPage() {
                         <Link
                             href={`/community/${post._id}`}
                             key={post._id}
-                            className="block bg-white border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow cursor-pointer"
+                            className="block bg-white border border-gray-200 rounded-xl p-4 hover:shadow-md transition-all cursor-pointer active:scale-[0.99]"
                         >
                             <div className="flex items-center gap-2 mb-2">
-                                <span className="px-2 py-1 rounded text-xs font-medium border bg-blue-100 text-blue-600 border-blue-200">
+                                <span className="px-2 py-1 rounded text-xs font-medium border bg-blue-50 text-blue-600 border-blue-200">
                                     자유
                                 </span>
                                 <span className="text-xs text-gray-500">동양미래대학교</span>
@@ -95,13 +89,17 @@ export default async function CommunityPage() {
                 )}
             </div>
 
-            {/* 글쓰기 버튼 (FAB) */}
-            <Link
-                href="/community/add"
-                className="fixed bottom-24 right-6 w-14 h-14 bg-blue-600 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-blue-700 transition-colors z-50"
-            >
-                <Plus size={24} />
-            </Link>
+            {/* ⭐️ [수정] 글쓰기 버튼 (FAB) - Fixed Wrapper 패턴 적용 */}
+            {/* 1. Wrapper: Fixed로 뷰포트에 고정하되, App의 max-width에 맞춰 중앙 정렬 */}
+            <div className="fixed bottom-0 inset-x-0 max-w-[393px] mx-auto z-50 pointer-events-none">
+                <Link
+                    href="/community/add"
+                    // 2. Button: Absolute로 Wrapper의 오른쪽 하단에 정확히 배치 (bottom-20 유지)
+                    className="absolute bottom-20 right-6 w-14 h-14 bg-blue-600 text-white rounded-full flex items-center justify-center shadow-lg shadow-blue-600/30 hover:bg-blue-700 transition-all active:scale-90 pointer-events-auto"
+                >
+                    <Plus size={24} />
+                </Link>
+            </div>
         </div>
     );
 }
