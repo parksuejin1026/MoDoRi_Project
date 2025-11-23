@@ -1,9 +1,7 @@
-// 📁 app/api/community/[postId]/route.ts (GET, PUT, DELETE 통합)
+// 📁 app/api/community/[postId]/route.ts (GET, PUT, DELETE, PATCH 통합)
 
-import { NextResponse } from 'next/server';
-// ⭐️ [수정] PostModel을 lib/db/mongodb에서 가져옵니다.
+import { NextResponse, NextRequest } from 'next/server';
 import dbConnect, { PostModel } from '@/lib/db/mongodb';
-// 🚨 기존 import Post from '@/models/Post'; 줄은 삭제되었습니다.
 import { Types } from 'mongoose';
 
 export const dynamic = 'force-dynamic';
@@ -15,7 +13,7 @@ interface RouteParams {
     };
 }
 
-// 1. 게시글 단일 조회 (GET 요청) - 수정 폼 데이터 로딩용
+// 1. 게시글 단일 조회 (GET 요청)
 export async function GET(req: Request, { params }: RouteParams) {
     const { postId } = params;
 
@@ -29,7 +27,6 @@ export async function GET(req: Request, { params }: RouteParams) {
     await dbConnect();
 
     try {
-        // ⭐️ [수정] PostModel 사용
         const post = await PostModel.findById(postId).lean();
 
         if (!post) {
@@ -54,7 +51,7 @@ export async function GET(req: Request, { params }: RouteParams) {
 
 
 // 2. 게시글 수정 (PUT 요청)
-export async function PUT(req: Request, { params }: RouteParams) {
+export async function PUT(req: NextRequest, { params }: RouteParams) {
     const { postId } = params;
 
     if (!Types.ObjectId.isValid(postId)) {
@@ -68,31 +65,40 @@ export async function PUT(req: Request, { params }: RouteParams) {
 
     try {
         const body = await req.json();
-        const { title, content, author } = body;
+        const { title, content, author, category, currentUserId } = body;
 
-        if (!title || !content) {
+        if (!title || !content || !currentUserId) {
             return NextResponse.json(
-                { success: false, error: '제목과 내용은 필수 입력 항목입니다.' },
+                { success: false, error: '필수 입력 항목이 누락되었습니다.' },
                 { status: 400 }
             );
         }
 
-        // ⭐️ [수정] PostModel 사용
-        const updatedPost = await PostModel.findByIdAndUpdate(
-            postId,
-            { title, content, author, updatedAt: new Date() },
-            { new: true, runValidators: true } // new: true는 업데이트된 문서를 반환
-        );
+        const post = await PostModel.findById(postId);
 
-        if (!updatedPost) {
+        if (!post) {
             return NextResponse.json(
-                { success: false, error: '게시글을 찾을 수 없어 수정에 실패했습니다.' },
+                { success: false, error: '게시글을 찾을 수 없습니다.' },
                 { status: 404 }
             );
         }
 
+        // ⭐️ [점검] 권한 확인: 게시물 작성자 ID와 현재 사용자 ID 비교
+        if (post.userId !== currentUserId) {
+            return NextResponse.json(
+                { success: false, error: '본인의 게시물만 수정할 수 있습니다.' },
+                { status: 403 } // 권한 없음
+            );
+        }
+
+        const updatedPost = await PostModel.findByIdAndUpdate(
+            postId,
+            { title, content, author, category, updatedAt: new Date() },
+            { new: true, runValidators: true }
+        );
+
         return NextResponse.json(
-            { success: true, data: { _id: updatedPost._id.toString() } },
+            { success: true, data: { _id: updatedPost?._id.toString() } },
             { status: 200 }
         );
     } catch (error) {
@@ -106,7 +112,7 @@ export async function PUT(req: Request, { params }: RouteParams) {
 
 
 // 3. 게시글 삭제 (DELETE 요청)
-export async function DELETE(req: Request, { params }: RouteParams) {
+export async function DELETE(req: NextRequest, { params }: RouteParams) {
     const { postId } = params;
 
     if (!Types.ObjectId.isValid(postId)) {
@@ -119,15 +125,34 @@ export async function DELETE(req: Request, { params }: RouteParams) {
     await dbConnect();
 
     try {
-        // ⭐️ [수정] PostModel 사용
-        const deletedPost = await PostModel.findByIdAndDelete(postId);
+        const body = await req.json();
+        const { currentUserId } = body;
 
-        if (!deletedPost) {
+        if (!currentUserId) {
             return NextResponse.json(
-                { success: false, error: '게시글을 찾을 수 없어 삭제에 실패했습니다.' },
+                { success: false, error: '사용자 인증 정보가 누락되었습니다.' },
+                { status: 400 }
+            );
+        }
+
+        const post = await PostModel.findById(postId);
+
+        if (!post) {
+            return NextResponse.json(
+                { success: false, error: '게시글을 찾을 수 없습니다.' },
                 { status: 404 }
             );
         }
+
+        // ⭐️ [점검] 권한 확인: 게시물 작성자 ID와 현재 사용자 ID 비교 (다른 사람 게시물 삭제 방지)
+        if (post.userId !== currentUserId) {
+            return NextResponse.json(
+                { success: false, error: '본인의 게시물만 삭제할 수 있습니다.' },
+                { status: 403 }
+            );
+        }
+
+        const deletedPost = await PostModel.findByIdAndDelete(postId);
 
         return NextResponse.json(
             { success: true, message: '게시글이 성공적으로 삭제되었습니다.' },
@@ -137,6 +162,71 @@ export async function DELETE(req: Request, { params }: RouteParams) {
         console.error('게시글 삭제 오류:', error);
         return NextResponse.json(
             { success: false, error: '게시글 삭제 중 서버 오류가 발생했습니다.' },
+            { status: 500 }
+        );
+    }
+}
+
+
+// 4. 좋아요 처리 (PATCH 요청)
+export async function PATCH(req: NextRequest, { params }: RouteParams) {
+    const { postId } = params;
+
+    if (!Types.ObjectId.isValid(postId)) {
+        return NextResponse.json(
+            { success: false, error: '유효하지 않은 게시글 ID 형식입니다.' },
+            { status: 400 }
+        );
+    }
+
+    await dbConnect();
+
+    try {
+        const body = await req.json();
+        const { currentUserId } = body;
+
+        if (!currentUserId) {
+            return NextResponse.json(
+                { success: false, error: '사용자 ID가 필요합니다.' },
+                { status: 400 }
+            );
+        }
+
+        const post = await PostModel.findById(postId);
+
+        if (!post) {
+            return NextResponse.json(
+                { success: false, error: '게시글을 찾을 수 없습니다.' },
+                { status: 404 }
+            );
+        }
+
+        const isLiked = post.likes.includes(currentUserId);
+
+        let updateQuery;
+        if (isLiked) {
+            // 좋아요 취소: 배열에서 ID 제거
+            updateQuery = { $pull: { likes: currentUserId } };
+        } else {
+            // 좋아요 추가: 배열에 ID 추가
+            updateQuery = { $push: { likes: currentUserId } };
+        }
+
+        const updatedPost = await PostModel.findByIdAndUpdate(
+            postId,
+            updateQuery,
+            { new: true }
+        );
+
+        return NextResponse.json(
+            { success: true, isLiked: !isLiked, likesCount: updatedPost?.likes.length },
+            { status: 200 }
+        );
+
+    } catch (error) {
+        console.error('좋아요 처리 오류:', error);
+        return NextResponse.json(
+            { success: false, error: '좋아요 처리 중 서버 오류가 발생했습니다.' },
             { status: 500 }
         );
     }
