@@ -1,7 +1,8 @@
 // 📁 app/community/[postId]/page.tsx
 import Link from 'next/link';
-import dbConnect from '@/lib/db/mongodb';
-import Post from '@/models/Post';
+// ⭐️ [수정] dbConnect와 PostModel을 lib/db/mongodb에서 가져옵니다.
+import dbConnect, { PostModel } from '@/lib/db/mongodb';
+// import Post from '@/models/Post'; // 🚨 이 줄은 삭제되었습니다.
 import { Types } from 'mongoose';
 import DeleteButton from '@/components/DeleteButton';
 import { ArrowLeft, ThumbsUp, MessageSquare } from 'lucide-react';
@@ -23,8 +24,8 @@ async function getPost(postId: string): Promise<PostData | null> {
 
     try {
         await dbConnect();
-        // ⭐️ 조회수 증가 로직 (옵션)
-        const updatedPost = await Post.findByIdAndUpdate(
+        // ⭐️ [수정] Post.findByIdAndUpdate() 대신 PostModel.findByIdAndUpdate()를 사용합니다.
+        const updatedPost = await PostModel.findByIdAndUpdate(
             postId,
             { $inc: { views: 1 } },
             { new: true }

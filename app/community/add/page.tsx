@@ -1,7 +1,7 @@
 // 📁 app/community/add/page.tsx
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react'; // ⭐️ useEffect 임포트 추가
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
@@ -9,10 +9,22 @@ import { ArrowLeft } from 'lucide-react';
 export default function WritePage() {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
-  // ⭐️ [수정] 로컬 스토리지에서 사용자 이름 불러오기 (선택 사항)
-  const [author, setAuthor] = useState(localStorage.getItem('userName') || '');
+
+  // ⭐️ [수정] useState 초기값을 빈 문자열로 설정하여 서버 렌더링 오류 방지
+  const [author, setAuthor] = useState('');
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
+
+  // ⭐️ [수정] 클라이언트 측에서만 localStorage를 읽어와 author 상태를 설정합니다.
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedName = localStorage.getItem('userName');
+      if (storedName) {
+        setAuthor(storedName);
+      }
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

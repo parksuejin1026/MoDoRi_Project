@@ -1,7 +1,8 @@
 // 📁 app/community/page.tsx
 import Link from 'next/link';
-import dbConnect from '@/lib/db/mongodb';
-import Post from '@/models/Post';
+// ⭐️ [수정] Post 대신 PostModel을 lib/db/mongodb에서 가져옵니다.
+import dbConnect, { PostModel } from '@/lib/db/mongodb';
+// import Post from '@/models/Post'; // 🚨 이 줄은 삭제되었습니다.
 import { MessageSquare, ThumbsUp, Clock, Plus } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
@@ -9,7 +10,8 @@ export const dynamic = 'force-dynamic';
 async function getPosts() {
     try {
         await dbConnect();
-        const posts = await Post.find({}).sort({ createdAt: -1 }).lean();
+        // ⭐️ [수정] Post.find() 대신 PostModel.find()를 사용합니다.
+        const posts = await PostModel.find({}).sort({ createdAt: -1 }).lean();
         return JSON.parse(JSON.stringify(posts));
     } catch (error) {
         return [];
