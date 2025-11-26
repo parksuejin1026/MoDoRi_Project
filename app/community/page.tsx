@@ -1,12 +1,10 @@
 // 📁 app/community/page.tsx
+'use client';
 
 import Link from 'next/link';
-// ⭐️ [점검] dbConnect와 PostModel, CommentModel을 lib/db/mongodb에서 가져옵니다.
-import dbConnect, { PostModel, CommentModel } from '@/lib/db/mongodb';
 import { MessageSquare, ThumbsUp, Eye, Clock, Plus } from 'lucide-react';
-import { Types } from 'mongoose';
-
-export const dynamic = 'force-dynamic';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 
 interface PostData {
     _id: string;
@@ -15,61 +13,53 @@ interface PostData {
     author: string;
     category: string;
     userId: string;
+    school?: string; // ⭐️ 학교 정보 추가
     views: number;
     likes: string[];
     createdAt: string;
+    commentCount: number;
+    likesCount: number;
 }
 
-// ⭐️ 모든 통계 정보를 포함하여 포스트 목록을 가져오는 서버 함수
-async function getPosts(categoryFilter: string) {
-    try {
-        await dbConnect();
+export default function CommunityPage() {
+    const searchParams = useSearchParams();
+    const currentCategory = searchParams.get('category') || '전체';
 
-        let query: any = {};
-        // ⭐️ [점검] userId 필터링 코드가 없으므로, 모든 사용자의 게시물을 조회합니다.
-        if (categoryFilter && categoryFilter !== '전체') {
-            query.category = categoryFilter;
+    const [posts, setPosts] = useState<PostData[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [userSchool, setUserSchool] = useState<string>('');
+
+    useEffect(() => {
+        // 1. 로컬 스토리지에서 학교 정보 가져오기
+        const storedSchool = localStorage.getItem('userSchool');
+        if (storedSchool) {
+            setUserSchool(storedSchool);
         }
 
-        // 1. 게시물 목록 조회 (모든 사용자 게시물 포함)
-        const posts = await PostModel.find(query)
-            .sort({ createdAt: -1 })
-            .lean();
+        // 2. 게시물 데이터 가져오기
+        const fetchPosts = async () => {
+            setLoading(true);
+            try {
+                // 학교 정보가 있으면 쿼리 파라미터에 추가
+                let url = `/api/community?category=${currentCategory}`;
+                if (storedSchool) {
+                    url += `&school=${encodeURIComponent(storedSchool)}`;
+                }
 
-        const postObjects = JSON.parse(JSON.stringify(posts)) as PostData[];
+                const res = await fetch(url);
+                if (!res.ok) throw new Error('Failed to fetch posts');
 
-        // ⭐️ [수정] postIds를 Types.ObjectId 배열로 정확히 변환합니다.
-        const postIds = postObjects.map(p => new Types.ObjectId(p._id));
+                const data = await res.json();
+                setPosts(data);
+            } catch (error) {
+                console.error("Error fetching posts:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
 
-        // 2. 해당 게시물들의 댓글 카운트 조회
-        const commentsCount = await CommentModel.aggregate([
-            { $match: { postId: { $in: postIds } } },
-            { $group: { _id: "$postId", count: { $sum: 1 } } }
-        ]);
-
-        // 3. 댓글 카운트를 게시물 데이터에 병합
-        const commentsMap = new Map(commentsCount.map(item => [item._id.toString(), item.count]));
-
-        // 4. 최종 데이터 구조 생성
-        const finalPosts = postObjects.map(post => ({
-            ...post,
-            commentCount: commentsMap.get(post._id.toString()) || 0,
-            likesCount: (post.likes || []).length
-        }));
-
-        return finalPosts;
-
-    } catch (error) {
-        console.error("Error fetching posts with counts:", error);
-        return [];
-    }
-}
-
-export default async function CommunityPage({ searchParams }: {
-    searchParams: { category?: string }
-}) {
-    const currentCategory = searchParams.category || '전체';
-    const posts = await getPosts(currentCategory);
+        fetchPosts();
+    }, [currentCategory]);
 
     return (
         <div className="flex-1 overflow-y-auto p-6 pb-24 relative min-h-screen bg-background">
@@ -77,7 +67,9 @@ export default async function CommunityPage({ searchParams }: {
             {/* 타이틀 영역 */}
             <div className="mb-8">
                 <h2 className="text-2xl font-bold text-foreground mb-2">커뮤니티</h2>
-                <p className="text-sm text-muted-foreground">학칙에 대한 질문과 정보를 공유해보세요</p>
+                <p className="text-sm text-muted-foreground">
+                    {userSchool ? `${userSchool} 학생들과 소통해보세요` : '학칙에 대한 질문과 정보를 공유해보세요'}
+                </p>
             </div>
 
             {/* ⭐️ 카테고리 필터 UI */}
@@ -100,8 +92,12 @@ export default async function CommunityPage({ searchParams }: {
 
             {/* 게시글 목록 */}
             <div className="flex flex-col gap-4">
-                {posts.length > 0 ? (
-                    posts.map((post: any) => ( // post type을 any로 받아 commentCount, likesCount 사용
+                {loading ? (
+                    <div className="text-center py-20 text-muted-foreground">
+                        <p>게시물을 불러오는 중...</p>
+                    </div>
+                ) : posts.length > 0 ? (
+                    posts.map((post) => (
                         <Link
                             href={`/community/${post._id}`}
                             key={post._id}
@@ -111,7 +107,9 @@ export default async function CommunityPage({ searchParams }: {
                                 <span className="px-2 py-1 rounded text-xs font-medium border bg-blue-50 text-blue-600 border-blue-200">
                                     {post.category}
                                 </span>
-                                <span className="text-xs text-muted-foreground">동양미래대학교</span>
+                                <span className="text-xs text-muted-foreground">
+                                    {post.school || '학교 미지정'}
+                                </span>
                             </div>
 
                             <h3 className="text-foreground font-medium mb-1 truncate">{post.title}</h3>

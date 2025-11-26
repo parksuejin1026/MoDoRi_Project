@@ -1,6 +1,5 @@
 // 📁 lib/db/mongodb.ts
 
-// ⭐️ [수정] Types 네임스페이스를 mongoose에서 직접 임포트합니다. (오류 2 해결)
 import mongoose, { Document, Model, Schema, Types } from 'mongoose';
 
 const MONGODB_URI = process.env.MONGODB_URI as string;
@@ -9,18 +8,17 @@ if (!MONGODB_URI) {
   throw new Error('Please define the MONGODB_URI environment variable inside .env.local');
 }
 
-// ⭐️ [제거] 불필요한 import { IUser } from './user'; 구문과 Mock IUser 인터페이스가 제거되었습니다. (오류 1 해결)
-
-// 게시물 인터페이스에 userId, userEmail, category, likes 추가
+// 게시물 인터페이스에 userId, userEmail, category, likes, school 추가
 export interface IPostData {
   title: string;
   content: string;
   author: string;
-  userId: string; // ⭐️ 추가: 작성자 고유 ID
-  userEmail: string; // ⭐️ 추가: 작성자 이메일 (권한 확인용)
-  category: '전체' | '질문' | '정보공유' | '자유'; // ⭐️ 추가: 카테고리
+  userId: string; // 작성자 고유 ID
+  userEmail: string; // 작성자 이메일 (권한 확인용)
+  school?: string; // ⭐️ 추가: 작성자 학교 (기존 데이터 호환을 위해 optional)
+  category: '전체' | '질문' | '정보공유' | '자유'; // 카테고리
   views: number;
-  likes: string[]; // ⭐️ 추가: 좋아요를 누른 사용자 ID 목록
+  likes: string[]; // 좋아요를 누른 사용자 ID 목록
   createdAt: Date;
   updatedAt: Date;
 }
@@ -43,6 +41,7 @@ const PostSchema = new Schema<IPost>({
   author: { type: String, required: true },
   userId: { type: String, required: true, index: true },
   userEmail: { type: String, required: true },
+  school: { type: String, required: false }, // ⭐️ 학교 필드 추가
   category: { type: String, required: true, default: '자유', enum: ['전체', '질문', '정보공유', '자유'] },
   views: { type: Number, default: 0 },
   likes: { type: [String], default: [] },

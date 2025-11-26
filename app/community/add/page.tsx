@@ -15,6 +15,7 @@ export default function WritePage() {
   const [category, setCategory] = useState<'질문' | '정보공유' | '자유'>('자유');
   const [currentUserId, setCurrentUserId] = useState<string>(''); // ⭐️ 추가
   const [currentUserEmail, setCurrentUserEmail] = useState<string>(''); // ⭐️ 추가
+  const [currentUserSchool, setCurrentUserSchool] = useState<string>(''); // ⭐️ 추가: 학교 정보
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
@@ -24,10 +25,12 @@ export default function WritePage() {
       const storedName = localStorage.getItem('userName');
       const storedId = localStorage.getItem('userId');
       const storedEmail = localStorage.getItem('userEmail');
+      const storedSchool = localStorage.getItem('userSchool'); // ⭐️ 학교 정보 가져오기
 
       if (storedName) setAuthor(storedName);
       if (storedId) setCurrentUserId(storedId); // ⭐️ 저장
       if (storedEmail) setCurrentUserEmail(storedEmail); // ⭐️ 저장
+      if (storedSchool) setCurrentUserSchool(storedSchool); // ⭐️ 저장
     }
   }, []);
 
@@ -56,6 +59,7 @@ export default function WritePage() {
           category, // ⭐️ 카테고리 추가
           userId: currentUserId, // ⭐️ userId 추가
           userEmail: currentUserEmail, // ⭐️ userEmail 추가
+          school: currentUserSchool, // ⭐️ school 추가
         }),
       });
 

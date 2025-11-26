@@ -16,6 +16,8 @@ const SCHOOL_MAP: Record<string, string> = {
     '서울과학기술대학교': 'seoultech',
     '안산대학교': 'ansan',
     '순천향대학교': 'soonchunhyang',
+    '대전대학교': 'daejeon',
+    '경기과학기술대학교': 'gtec',
 };
 
 export default function ChatPage() {
