@@ -46,6 +46,7 @@ export default function ClientPostDetail({
     const [postData, setPostData] = useState<PostData>(initialPost);
     const [comments, setComments] = useState<CommentData[]>(initialComments);
     const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+    const [userSchool, setUserSchool] = useState<string | null>(null); // ⭐️ 학교 정보 상태 추가
     const [commentText, setCommentText] = useState('');
     const [isSubmittingComment, setIsSubmittingComment] = useState(false);
 
@@ -53,6 +54,7 @@ export default function ClientPostDetail({
     useEffect(() => {
         if (typeof window !== 'undefined') {
             setCurrentUserId(localStorage.getItem('userId'));
+            setUserSchool(localStorage.getItem('userSchool')); // ⭐️ 학교 정보 가져오기
         }
     }, []);
 
@@ -104,6 +106,7 @@ export default function ClientPostDetail({
             userId: currentUserId,
             author: userName,
             content: commentText.trim(),
+            school: userSchool, // ⭐️ 학교 정보 전송
         };
 
         try {

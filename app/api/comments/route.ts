@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
 
     try {
         const body = await req.json();
-        const { postId, userId, author, content } = body;
+        const { postId, userId, author, content, school } = body;
 
         // ⭐️ [강화] 필수 필드 누락 검사
         if (!postId || !userId || !author || !content) {
@@ -42,6 +42,7 @@ export async function POST(req: NextRequest) {
             userId: userId,
             author: author,
             content: content.trim(),
+            school: school, // ⭐️ 학교 정보 저장
         });
 
         // JSON 응답을 위해 Mongoose Document를 순수 객체로 변환

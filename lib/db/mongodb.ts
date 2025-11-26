@@ -31,6 +31,7 @@ export interface IComment extends Document {
   userId: string;
   author: string;
   content: string;
+  school?: string; // ⭐️ 추가: 작성자 학교
   createdAt: Date;
 }
 
@@ -57,6 +58,7 @@ const CommentSchema = new Schema<IComment>({
   userId: { type: String, required: true, index: true },
   author: { type: String, required: true },
   content: { type: String, required: true },
+  school: { type: String, required: false }, // ⭐️ 학교 필드 추가
   createdAt: { type: Date, default: Date.now },
 });
 

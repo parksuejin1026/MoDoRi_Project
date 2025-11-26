@@ -11,6 +11,8 @@ export default function ProfilePage() {
     const { showConfirm, showAlert } = useGlobalModal(); // ⭐️ Hook
     const [userId, setUserId] = useState('');
     const [userName, setUserName] = useState('Guest');
+    const [userSchool, setUserSchool] = useState(''); // ⭐️ 학교 정보 상태 추가
+    const [stats, setStats] = useState({ postCount: 0, commentCount: 0, likeCount: 0 }); // ⭐️ 통계 상태 추가
 
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [deletePassword, setDeletePassword] = useState('');
@@ -18,14 +20,35 @@ export default function ProfilePage() {
     useEffect(() => {
         const storedId = localStorage.getItem('userId') || localStorage.getItem('userEmail');
         const storedName = localStorage.getItem('userName');
+        const storedSchool = localStorage.getItem('userSchool'); // ⭐️ 학교 정보 가져오기
 
         if (storedId) {
             setUserId(storedId);
             setUserName(storedName || storedId);
+            if (storedSchool) setUserSchool(storedSchool);
+
+            // ⭐️ 통계 데이터 가져오기
+            fetchStats(storedId, storedSchool);
         } else {
             router.replace('/login');
         }
     }, [router]);
+
+    const fetchStats = async (id: string, school: string | null) => {
+        try {
+            let url = `/api/user/stats?userId=${id}`;
+            if (school) {
+                url += `&school=${encodeURIComponent(school)}`;
+            }
+            const res = await fetch(url);
+            if (res.ok) {
+                const data = await res.json();
+                setStats(data.data);
+            }
+        } catch (error) {
+            console.error("Failed to fetch stats:", error);
+        }
+    };
 
     const avatarLetter = userName.charAt(0).toUpperCase();
 
@@ -123,16 +146,24 @@ export default function ProfilePage() {
                         <div>
                             <div className="text-xl font-bold text-foreground mb-1">{userName}</div>
                             <div className="text-sm text-muted-foreground">{userId}</div>
+                            {/* ⭐️ 학교 정보 표시 */}
+                            <div className="text-xs text-blue-600 mt-1 font-medium">{userSchool}</div>
                         </div>
                     </div>
 
                     <div className="grid grid-cols-3 gap-4 pt-6 border-t border-border">
-                        {['작성한 글', '댓글', '좋아요'].map((label) => (
-                            <div key={label} className="text-center">
-                                <div className="text-2xl font-bold text-primary mb-1">0</div>
-                                <div className="text-xs text-muted-foreground">{label}</div>
-                            </div>
-                        ))}
+                        <div className="text-center">
+                            <div className="text-2xl font-bold text-primary mb-1">{stats.postCount}</div>
+                            <div className="text-xs text-muted-foreground">작성한 글</div>
+                        </div>
+                        <div className="text-center">
+                            <div className="text-2xl font-bold text-primary mb-1">{stats.commentCount}</div>
+                            <div className="text-xs text-muted-foreground">댓글</div>
+                        </div>
+                        <div className="text-center">
+                            <div className="text-2xl font-bold text-primary mb-1">{stats.likeCount}</div>
+                            <div className="text-xs text-muted-foreground">좋아요</div>
+                        </div>
                     </div>
                 </div>
 
