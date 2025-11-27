@@ -35,7 +35,7 @@ export default function LoginPage() {
                 localStorage.setItem('userId', data.user.userid);
                 localStorage.setItem('userName', data.user.name);
                 localStorage.setItem('userSchool', data.user.school);
-                localStorage.setItem('userEmail', data.user.userid); // 참고: userEmail이라는 키에 userId를 저장하고 있었음 (기존 로직 유지)
+                localStorage.setItem('userEmail', data.user.userid);
 
                 router.push('/');
             } else {
@@ -81,9 +81,8 @@ export default function LoginPage() {
                             {/* ⭐️ [수정] 텍스트 색상 테마 변수 적용 */}
                             <label htmlFor="password" className="text-sm font-medium text-foreground">비밀번호</label>
                             {/* ⭐️ [수정] 텍스트 색상 테마 변수 적용 */}
-                            <button
-                                type="button"
-                                onClick={handleForgotPassword}
+                            <Link
+                                href="/reset-password"
                                 className="text-xs text-primary hover:text-primary/70 hover:underline transition-colors"
                             >
                                 비밀번호를 잊으셨나요?
