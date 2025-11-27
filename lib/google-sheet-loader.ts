@@ -23,6 +23,8 @@ function mapCodeToKoreanName(code: string): string {
     case 'seoultech': return '서울과학기술대학교';
     case 'ansan': return '안산대학교';
     case 'soonchunhyang': return '순천향대학교';
+    case 'daejeon': return '대전대학교';
+    case 'gtec': return '경기과학기술대학교';
     default: return '';
   }
 }

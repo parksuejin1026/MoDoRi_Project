@@ -1,17 +1,18 @@
 // 📁 app/api/auth/signup/route.ts
 import { NextResponse } from 'next/server';
 import { getAllUsers, addUserToSheet } from '@/lib/google-sheet-auth';
-import bcrypt from 'bcryptjs'; // 비밀번호 암호화는 시트여도 필수!
+import bcrypt from 'bcryptjs';
 
 export async function POST(req: Request) {
     try {
-        const { userid, password, name, school } = await req.json();
+        // ⭐️ email 필드 추가
+        const { userid, password, name, school, email } = await req.json();
 
-        if (!userid || !password || !name || !school) {
-            return NextResponse.json({ error: '모든 항목을 입력해주세요.' }, { status: 400 });
+        if (!userid || !password || !name || !school || !email) {
+            return NextResponse.json({ error: '모든 항목(이메일 포함)을 입력해주세요.' }, { status: 400 });
         }
 
-        // 1. 중복 아이디 체크 (시트의 모든 데이터를 가져와서 검사 - 성능상 좋지 않지만 시트니까 감수)
+        // 1. 중복 아이디 체크
         const users = await getAllUsers();
         const existingUser = users.find(u => u.userid === userid);
 
@@ -22,12 +23,13 @@ export async function POST(req: Request) {
         // 2. 비밀번호 암호화
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // 3. 구글 시트에 추가
+        // 3. 구글 시트에 추가 (email 포함)
         const success = await addUserToSheet({
             userid,
             password: hashedPassword,
             name,
-            school
+            school,
+            email
         });
 
         if (!success) {

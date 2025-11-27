@@ -1,3 +1,4 @@
+// 📁 app/profile/edit/page.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -81,58 +82,60 @@ export default function EditProfilePage() {
     };
 
     return (
-        <main className="min-h-screen bg-gray-50 pb-24">
-            <div className="max-w-[393px] mx-auto bg-white min-h-screen">
+        <main className="min-h-screen bg-background pb-100">
+            <div className="max-w-[393px] mx-auto bg-card min-h-screen">
 
-                <div className="sticky top-0 bg-white z-10 px-4 py-4 flex items-center gap-3 border-b border-gray-100">
-                    <Link href="/profile" className="p-2 -ml-2 hover:bg-gray-100 rounded-full transition-colors">
-                        <ArrowLeft size={24} className="text-gray-700" />
+                {/* 헤더 */}
+                <div className="sticky top-0 bg-card z-10 px-4 py-4 flex items-center gap-3 border-b border-border">
+                    <Link href="/profile" className="p-2 -ml-2 hover:bg-accent rounded-full transition-colors">
+                        <ArrowLeft size={24} className="text-muted-foreground" />
                     </Link>
-                    <h1 className="text-lg font-bold text-gray-900">프로필 수정</h1>
+                    <h1 className="text-lg font-bold text-foreground">프로필 수정</h1>
                 </div>
 
                 <div className="p-6">
                     <form onSubmit={handleSave} className="flex flex-col gap-6">
                         <div className="space-y-4">
-                            <h3 className="text-sm font-bold text-gray-900 border-l-4 border-blue-500 pl-2">기본 정보</h3>
+                            <h3 className="text-sm font-bold text-foreground border-l-4 border-primary pl-2">기본 정보</h3>
 
                             <div className="flex flex-col gap-2">
-                                <label htmlFor="name" className="text-sm font-semibold text-gray-700">이름</label>
+                                <label htmlFor="name" className="text-sm font-semibold text-foreground">이름</label>
                                 <input
                                     id="name"
                                     type="text"
-                                    className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 transition-all"
+                                    className="w-full px-4 py-3 border border-border rounded-xl text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all bg-muted text-foreground"
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
                                 />
                             </div>
 
                             <div className="flex flex-col gap-2">
-                                <label htmlFor="userid" className="text-sm font-semibold text-gray-700">아이디</label>
+                                <label htmlFor="userid" className="text-sm font-semibold text-foreground">아이디</label>
                                 <input
                                     id="userid"
                                     type="text"
-                                    className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 transition-all"
+                                    className="w-full px-4 py-3 border border-border rounded-xl text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all bg-muted text-foreground"
                                     value={newUserId}
                                     onChange={(e) => setNewUserId(e.target.value)}
                                 />
-                                <p className="text-xs text-gray-400 pl-1">
+                                <p className="text-xs text-muted-foreground pl-1">
                                     * 아이디 변경 시 다시 로그인해야 할 수 있습니다.
                                 </p>
                             </div>
                         </div>
 
-                        <hr className="border-gray-100 my-2" />
+                        <hr className="border-border my-2" />
 
-                        <div className="space-y-4">
-                            <h3 className="text-sm font-bold text-gray-900 border-l-4 border-blue-500 pl-2">보안 설정</h3>
+                        {/* 비밀번호 섹션 (간격 조정) */}
+                        <div className="space-y-3">
+                            <h3 className="text-sm font-bold text-foreground border-l-4 border-primary pl-2">보안 설정</h3>
 
                             <div className="flex flex-col gap-2">
-                                <label htmlFor="new-password" className="text-sm font-semibold text-gray-700">새 비밀번호 (변경 시 입력)</label>
+                                <label htmlFor="new-password" className="text-sm font-semibold text-foreground">새 비밀번호 (변경 시 입력)</label>
                                 <input
                                     id="new-password"
                                     type="password"
-                                    className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 transition-all"
+                                    className="w-full px-4 py-3 border border-border rounded-xl text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all bg-muted text-foreground"
                                     placeholder="변경하려면 입력하세요"
                                     value={newPassword}
                                     onChange={(e) => setNewPassword(e.target.value)}
@@ -141,14 +144,14 @@ export default function EditProfilePage() {
 
                             {newPassword && (
                                 <div className="flex flex-col gap-2">
-                                    <label htmlFor="confirm-password" className="text-sm font-semibold text-gray-700">새 비밀번호 확인</label>
+                                    <label htmlFor="confirm-password" className="text-sm font-semibold text-foreground">새 비밀번호 확인</label>
                                     <input
                                         id="confirm-password"
                                         type="password"
                                         className={`w-full px-4 py-3 border rounded-xl text-sm focus:outline-none transition-all ${confirmPassword && newPassword !== confirmPassword
-                                                ? 'border-red-300 focus:border-red-500 focus:ring-red-200'
-                                                : 'border-gray-200 focus:border-blue-500 focus:ring-blue-500/10'
-                                            }`}
+                                            ? 'border-red-300 focus:border-red-500 focus:ring-red-200'
+                                            : 'border-border focus:border-primary focus:ring-primary/10'
+                                            } bg-muted text-foreground`}
                                         placeholder="한 번 더 입력하세요"
                                         value={confirmPassword}
                                         onChange={(e) => setConfirmPassword(e.target.value)}
@@ -167,15 +170,18 @@ export default function EditProfilePage() {
                             )}
                         </div>
 
-                        <div className="bg-yellow-50 p-4 rounded-xl border border-yellow-100 mt-4">
+                        {/* ⭐️ [수정] 간격 및 색상 조정 섹션 */}
+                        <div className="bg-yellow-50 dark:bg-yellow-950 px-4 py-3 rounded-xl border border-yellow-100 dark:border-yellow-900 mt-3">
                             <div className="flex flex-col gap-2">
-                                <label htmlFor="current-password" className="text-sm font-bold text-yellow-800">
+                                {/* ⭐️ [수정] 텍스트 색상 조정: text-yellow-700 dark:text-yellow-400 */}
+                                <label htmlFor="current-password" className="text-sm font-bold text-yellow-700 dark:text-yellow-400">
                                     현재 비밀번호 확인 (필수)
                                 </label>
                                 <input
                                     id="current-password"
                                     type="password"
-                                    className="w-full px-4 py-3 border border-yellow-200 rounded-lg text-sm focus:outline-none focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 transition-all bg-white"
+                                    // ⭐️ [수정] 입력 필드 테두리 색상 조정: border-yellow-100 dark:border-yellow-900
+                                    className="w-full px-4 py-3 border border-yellow-100 dark:border-yellow-900 rounded-lg text-sm focus:outline-none focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 transition-all bg-card text-foreground"
                                     placeholder="본인 확인을 위해 입력해주세요"
                                     value={currentPassword}
                                     onChange={(e) => setCurrentPassword(e.target.value)}
@@ -185,7 +191,7 @@ export default function EditProfilePage() {
 
                         <button
                             type="submit"
-                            className="mt-2 w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg shadow-blue-600/20 transition-all active:scale-[0.98]"
+                            className="mt-2 w-full py-3.5 bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-xl shadow-lg shadow-primary/20 transition-all active:scale-[0.98]"
                         >
                             변경사항 저장
                         </button>
