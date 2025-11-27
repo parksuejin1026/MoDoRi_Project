@@ -4,8 +4,9 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { BookOpen } from 'lucide-react';
-import { useGlobalModal } from '@/components/GlobalModal';
+import { BookOpen, CheckCircle2, AlertCircle } from 'lucide-react';
+import { useGlobalModal } from '@/components/GlobalModal'; // ⭐️ Import
+import ThemeToggle from '@/components/ThemeToggle'; // ⭐️ [추가] ThemeToggle 임포트
 
 const schools = [
     '동양미래대학교', '한양대학교',
@@ -94,12 +95,16 @@ export default function SignupPage() {
 
     return (
         <div className="min-h-screen flex flex-col justify-center items-center p-6 bg-background">
+            {/* ⭐️ [수정] 배경 색상 테마 변수 적용 및 relative 추가 */}
             <div className="w-full max-w-[360px] bg-card rounded-xl border border-border shadow-sm p-6 my-8 relative">
 
+
                 <div className="text-center mb-8 pt-4">
+                    {/* ⭐️ [수정] 버튼 색상 테마 변수 적용 */}
                     <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mx-auto mb-4 text-primary-foreground">
                         <BookOpen size={32} />
                     </div>
+                    {/* ⭐️ [수정] 텍스트 색상 테마 변수 적용 */}
                     <h1 className="text-3xl font-bold text-primary mb-1">회원가입</h1>
                     <p className="text-sm text-muted-foreground">룰룩과 함께 시작하세요</p>
                 </div>
@@ -107,9 +112,11 @@ export default function SignupPage() {
                 <form onSubmit={handleSignup} className="flex flex-col gap-5">
                     {/* 아이디 */}
                     <div className="flex flex-col gap-2">
+                        {/* ⭐️ [수정] 텍스트 색상 테마 변수 적용 */}
                         <label className="text-sm font-medium text-foreground after:content-['*'] after:ml-0.5 after:text-red-500">아이디</label>
                         <input
                             type="text"
+                            // ⭐️ [수정] 입력창 테마 변수 적용
                             className="w-full px-4 py-3 border border-border rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all bg-muted text-foreground"
                             placeholder="4자 이상 입력하세요"
                             value={formData.userid}
@@ -135,17 +142,20 @@ export default function SignupPage() {
                         <label className="text-sm font-medium text-foreground after:content-['*'] after:ml-0.5 after:text-red-500">비밀번호</label>
                         <input
                             type="password"
+                            // ⭐️ [수정] 입력창 테마 변수 적용
                             className="w-full px-4 py-3 border border-border rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all bg-muted text-foreground"
                             placeholder="8자 이상 (영문/숫자/특수문자 조합)"
                             value={formData.password}
                             onChange={(e) => handleInputChange('password', e.target.value)}
                         />
+                        {/* 비밀번호 강도 UI는 그대로 유지 */}
                     </div>
 
                     <div className="flex flex-col gap-2">
                         <label className="text-sm font-medium text-foreground after:content-['*'] after:ml-0.5 after:text-red-500">비밀번호 확인</label>
                         <input
                             type="password"
+                            // ⭐️ [수정] 입력창 테마 변수 적용
                             className={`w-full px-4 py-3 border rounded-lg text-sm focus:outline-none transition-all ${formData.passwordConfirm && formData.password !== formData.passwordConfirm
                                 ? 'border-red-300 focus:border-red-500 focus:ring-4 focus:ring-red-100'
                                 : 'border-border focus:border-primary focus:ring-4 focus:ring-primary/10'
@@ -154,6 +164,7 @@ export default function SignupPage() {
                             value={formData.passwordConfirm}
                             onChange={(e) => handleInputChange('passwordConfirm', e.target.value)}
                         />
+                        {/* 일치/불일치 메시지 UI는 그대로 유지 */}
                     </div>
 
                     {/* 이름 */}
@@ -161,6 +172,7 @@ export default function SignupPage() {
                         <label className="text-sm font-medium text-foreground after:content-['*'] after:ml-0.5 after:text-red-500">이름</label>
                         <input
                             type="text"
+                            // ⭐️ [수정] 입력창 테마 변수 적용
                             className="w-full px-4 py-3 border border-border rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all bg-muted text-foreground"
                             placeholder="홍길동"
                             value={formData.name}
@@ -172,6 +184,7 @@ export default function SignupPage() {
                     <div className="flex flex-col gap-2">
                         <label className="text-sm font-medium text-foreground after:content-['*'] after:ml-0.5 after:text-red-500">학교</label>
                         <select
+                            // ⭐️ [수정] 입력창 테마 변수 적용
                             className="w-full px-4 py-3 border border-border rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all bg-muted text-foreground"
                             value={formData.school}
                             onChange={(e) => handleInputChange('school', e.target.value)}

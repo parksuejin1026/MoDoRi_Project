@@ -8,10 +8,16 @@ import { Types } from 'mongoose';
 
 export const dynamic = 'force-dynamic';
 
-// 1. 게시글 생성 (POST 요청) - ⭐️ userId, userEmail, category, school 추가
+// ⭐️ [추가된 헬퍼 함수] 정규식 특수 문자를 이스케이프하는 함수
+function escapeRegExp(string: string): string {
+    // [ \ ^ $ . | ? * + ( ) ] 문자를 찾아 앞에 \를 붙여 이스케이프합니다.
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+// 1. 게시글 생성 (POST 요청) - 기존 유지
 export async function POST(req: NextRequest) {
     await dbConnect();
-
+    // ... (기존 POST 로직 유지)
     try {
         const body = await req.json();
         const { title, content, author, userId, userEmail, category, school } = body;
@@ -30,7 +36,7 @@ export async function POST(req: NextRequest) {
             userId,
             userEmail,
             category,
-            school, // ⭐️ 저장 (없을 수도 있음)
+            school,
             views: 0,
             likes: [],
             createdAt: new Date(),
@@ -53,29 +59,42 @@ export async function POST(req: NextRequest) {
     }
 }
 
-// 2. 게시글 목록 조회 (GET 요청) - ⭐️ 학교 필터링 추가
+// 2. 게시글 목록 조회 (GET 요청) - ⭐️ 검색어 이스케이프 로직 추가
 export async function GET(req: NextRequest) {
     await dbConnect();
 
     try {
         const { searchParams } = new URL(req.url);
         const category = searchParams.get('category');
-        const school = searchParams.get('school'); // ⭐️ 학교 필터
+        const school = searchParams.get('school');
+        const search = searchParams.get('search');
 
         let query: any = {};
 
-        // 카테고리 필터
+        // 1. 카테고리 필터
         if (category && category !== '전체') {
             query.category = category;
         }
 
-        // ⭐️ 학교 필터: 학교 정보가 있는 경우 해당 학교 게시물만 조회
-        // (학교 정보가 없는 레거시 게시물은 보이지 않게 됨. 필요 시 $or 조건으로 처리 가능하나, 여기서는 학교별 분리를 우선함)
+        // 2. 학교 필터
         if (school) {
             query.school = school;
         }
 
-        // 1. 게시물 목록 조회
+        // ⭐️ [핵심 수정] 검색어 필터 (제목 또는 내용) - 검색어 이스케이프 적용
+        if (search) {
+            const escapedSearch = escapeRegExp(search);
+
+            // 이스케이프된 검색어로 정규 표현식 생성 (대소문자 구분 없음)
+            const searchRegex = { $regex: escapedSearch, $options: 'i' };
+            query.$or = [
+                { title: searchRegex },
+                { content: searchRegex }
+            ];
+        }
+
+
+        // 3. 게시물 목록 조회
         const posts = await PostModel.find(query)
             .sort({ createdAt: -1 })
             .lean();
@@ -85,16 +104,16 @@ export async function GET(req: NextRequest) {
         // postIds를 Types.ObjectId 배열로 변환
         const postIds = postObjects.map((p: any) => new Types.ObjectId(p._id));
 
-        // 2. 해당 게시물들의 댓글 카운트 조회
+        // 4. 해당 게시물들의 댓글 카운트 조회
         const commentsCount = await CommentModel.aggregate([
             { $match: { postId: { $in: postIds } } },
             { $group: { _id: "$postId", count: { $sum: 1 } } }
         ]);
 
-        // 3. 댓글 카운트를 게시물 데이터에 병합
+        // 5. 댓글 카운트를 게시물 데이터에 병합
         const commentsMap = new Map(commentsCount.map(item => [item._id.toString(), item.count]));
 
-        // 4. 최종 데이터 구조 생성
+        // 6. 최종 데이터 구조 생성
         const finalPosts = postObjects.map((post: any) => ({
             ...post,
             commentCount: commentsMap.get(post._id.toString()) || 0,
