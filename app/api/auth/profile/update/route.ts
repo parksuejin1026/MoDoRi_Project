@@ -48,7 +48,8 @@ export async function POST(req: Request) {
             userid: newUserId || user.userid,
             password: finalPassword,
             name: newName || user.name,
-            school: school || user.school
+            school: school || user.school,
+            email: user.email // ⭐️ 이메일 유지
         };
 
         // 6. 구글 시트 업데이트 실행
