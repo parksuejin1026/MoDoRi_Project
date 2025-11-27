@@ -68,6 +68,7 @@ export default function Home() {
                     {/* Chatbot Card */}
                     <div className="bg-card border border-border rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
                         <div className="p-6 flex items-center gap-3">
+                            {/* 색상 유지 (Accent) */}
                             <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center">
                                 <MessageCircle size={24} />
                             </div>
@@ -94,6 +95,7 @@ export default function Home() {
                     {/* Community Card */}
                     <div className="bg-card border border-border rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
                         <div className="p-6 flex items-center gap-3">
+                            {/* 색상 유지 (Accent) */}
                             <div className="w-12 h-12 bg-violet-100 text-violet-600 rounded-xl flex items-center justify-center">
                                 <Users size={24} />
                             </div>

@@ -15,7 +15,7 @@ const schools = [
 
 export default function SignupPage() {
     const router = useRouter();
-    const { showAlert } = useGlobalModal(); // ⭐️ Hook
+    const { showAlert } = useGlobalModal();
 
     const [formData, setFormData] = useState({
         userid: '',
@@ -23,27 +23,23 @@ export default function SignupPage() {
         passwordConfirm: '',
         name: '',
         school: '',
+        email: '', // ⭐️ 이메일 상태 추가
     });
-
-    const [passwordStrength, setPasswordStrength] = useState(0);
 
     const handleInputChange = (field: string, value: string) => {
         setFormData(prev => ({ ...prev, [field]: value }));
-        if (field === 'password') checkPasswordStrength(value);
-    };
-
-    const checkPasswordStrength = (password: string) => {
-        let strength = 0;
-        if (password.length >= 8) strength++;
-        if (/[A-Za-z]/.test(password)) strength++;
-        if (/\d/.test(password)) strength++;
-        if (/[!@#$%^&*]/.test(password)) strength++;
-        setPasswordStrength(strength);
     };
 
     const validateForm = () => {
         if (!formData.userid || formData.userid.trim().length < 4) {
             showAlert('아이디는 4자 이상 입력해주세요.');
+            return false;
+        }
+
+        // ⭐️ 이메일 유효성 검사
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(formData.email)) {
+            showAlert('올바른 이메일 형식을 입력해주세요.');
             return false;
         }
 
@@ -73,8 +69,6 @@ export default function SignupPage() {
 
     const handleSignup = async (e: React.FormEvent) => {
         e.preventDefault();
-
-        // validateForm에서 이미 모달을 띄우므로 false만 체크
         if (!validateForm()) return;
 
         try {
@@ -116,6 +110,7 @@ export default function SignupPage() {
                 </div>
 
                 <form onSubmit={handleSignup} className="flex flex-col gap-5">
+                    {/* 아이디 */}
                     <div className="flex flex-col gap-2">
                         {/* ⭐️ [수정] 텍스트 색상 테마 변수 적용 */}
                         <label className="text-sm font-medium text-foreground after:content-['*'] after:ml-0.5 after:text-red-500">아이디</label>
@@ -129,6 +124,20 @@ export default function SignupPage() {
                         />
                     </div>
 
+                    {/* ⭐️ 이메일 입력 (신규 추가) */}
+                    <div className="flex flex-col gap-2">
+                        <label className="text-sm font-medium text-foreground after:content-['*'] after:ml-0.5 after:text-red-500">이메일</label>
+                        <input
+                            type="email"
+                            className="w-full px-4 py-3 border border-border rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all bg-muted text-foreground"
+                            placeholder="example@email.com"
+                            value={formData.email}
+                            onChange={(e) => handleInputChange('email', e.target.value)}
+                        />
+                        <p className="text-xs text-muted-foreground">비밀번호 찾기에 사용됩니다.</p>
+                    </div>
+
+                    {/* 비밀번호 */}
                     <div className="flex flex-col gap-2">
                         <label className="text-sm font-medium text-foreground after:content-['*'] after:ml-0.5 after:text-red-500">비밀번호</label>
                         <input
@@ -158,6 +167,7 @@ export default function SignupPage() {
                         {/* 일치/불일치 메시지 UI는 그대로 유지 */}
                     </div>
 
+                    {/* 이름 */}
                     <div className="flex flex-col gap-2">
                         <label className="text-sm font-medium text-foreground after:content-['*'] after:ml-0.5 after:text-red-500">이름</label>
                         <input
@@ -170,6 +180,7 @@ export default function SignupPage() {
                         />
                     </div>
 
+                    {/* 학교 */}
                     <div className="flex flex-col gap-2">
                         <label className="text-sm font-medium text-foreground after:content-['*'] after:ml-0.5 after:text-red-500">학교</label>
                         <select

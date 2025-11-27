@@ -35,7 +35,7 @@ export default function LoginPage() {
                 localStorage.setItem('userId', data.user.userid);
                 localStorage.setItem('userName', data.user.name);
                 localStorage.setItem('userSchool', data.user.school);
-                localStorage.setItem('userEmail', data.user.userid);
+                localStorage.setItem('userEmail', data.user.userid); // 참고: userEmail이라는 키에 userId를 저장하고 있었음 (기존 로직 유지)
 
                 router.push('/');
             } else {
@@ -44,14 +44,6 @@ export default function LoginPage() {
         } catch (error) {
             await showAlert('서버 연결 중 오류가 발생했습니다.', '오류');
         }
-    };
-
-    // ⭐️ 비밀번호 찾기 안내 핸들러
-    const handleForgotPassword = () => {
-        showAlert(
-            '비밀번호 재설정은 관리자에게 문의해주세요.\n\n📧 이메일: cjh040602@icloud.com',
-            '비밀번호 찾기'
-        );
     };
 
     return (
@@ -95,7 +87,7 @@ export default function LoginPage() {
                                 className="text-xs text-primary hover:text-primary/70 hover:underline transition-colors"
                             >
                                 비밀번호를 잊으셨나요?
-                            </button>
+                            </Link>
                         </div>
                         <input
                             id="password"
