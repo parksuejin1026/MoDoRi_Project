@@ -8,7 +8,7 @@ import { Home, MessageCircle, Users, User, Calendar } from 'lucide-react';
 export default function TabBar() {
     const pathname = usePathname();
 
-    if (pathname === '/login' || pathname === '/signup') {
+    if (pathname === '/login' || pathname === '/signup' || pathname === '/reset-password') {
         return null;
     }
 
