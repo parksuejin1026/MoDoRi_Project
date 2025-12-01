@@ -1,7 +1,8 @@
+// 📁 components/ChatSidebar.tsx
 'use client';
 
 import { useEffect, useState } from 'react';
-import { MessageSquare, Plus, X } from 'lucide-react';
+import { MessageSquare, Plus, X, GraduationCap } from 'lucide-react';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
 
@@ -34,7 +35,6 @@ export default function ChatSidebar({
     const [sessions, setSessions] = useState<ChatSession[]>([]);
     const [isLoading, setIsLoading] = useState(false);
 
-    // 세션 목록 불러오기
     const fetchSessions = async () => {
         try {
             setIsLoading(true);
@@ -58,7 +58,6 @@ export default function ChatSidebar({
 
     return (
         <>
-            {/* 오버레이 (모바일 및 데스크탑 모두 적용) */}
             {isOpen && (
                 <div
                     className="fixed inset-0 bg-black/50 z-30 transition-opacity"
@@ -66,14 +65,18 @@ export default function ChatSidebar({
                 />
             )}
 
-            {/* 사이드바 */}
             <div className={`
                 fixed inset-y-0 left-0 z-40 w-64 bg-card border-r border-border transform transition-transform duration-300 ease-in-out shadow-lg
                 ${isOpen ? 'translate-x-0' : '-translate-x-full'}
             `}>
                 <div className="flex flex-col h-full">
                     <div className="p-4 border-b border-border flex justify-between items-center">
-                        <h2 className="font-semibold text-foreground">채팅 기록</h2>
+                        <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-primary-foreground">
+                                <GraduationCap size={18} />
+                            </div>
+                            <span className="font-bold text-lg text-foreground">유니메이트</span>
+                        </div>
                         <button onClick={onClose} className="p-1 hover:bg-muted rounded text-muted-foreground hover:text-foreground">
                             <X size={20} />
                         </button>

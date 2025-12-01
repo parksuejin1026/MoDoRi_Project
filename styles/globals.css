@@ -1,52 +1,78 @@
-/* 📁 app/globals.css */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
     :root {
-        /* Light Theme (White Background) */
-        --background: #ffffff;
-        --foreground: #1f2937;
-        --primary: #2563eb;
-        --primary-foreground: #ffffff;
-        --secondary: #eff6ff;
-        --secondary-foreground: #2563eb;
-        --muted: #f3f4f6;
-        --muted-foreground: #6b7280;
-        --accent: #f3f4f6;
-        --accent-foreground: #1f2937;
-        --card: #ffffff;
-        --card-foreground: #1f2937;
-        --border: #e5e7eb;
-        --radius: 0.5rem;
+        --background: 0 0% 100%;
+        --foreground: 222.2 84% 4.9%;
 
-        /* Custom Variables */
-        --color-text-primary: #1f2937;
-        --color-text-secondary: #6b7280;
+        --card: 0 0% 100%;
+        --card-foreground: 222.2 84% 4.9%;
+
+        --popover: 0 0% 100%;
+        --popover-foreground: 222.2 84% 4.9%;
+
+        --primary: 221.2 83.2% 53.3%;
+        --primary-foreground: 210 40% 98%;
+
+        --secondary: 210 40% 96.1%;
+        --secondary-foreground: 222.2 47.4% 11.2%;
+
+        --muted: 210 40% 96.1%;
+        --muted-foreground: 215.4 16.3% 46.9%;
+
+        --accent: 210 40% 96.1%;
+        --accent-foreground: 222.2 47.4% 11.2%;
+
+        --destructive: 0 84.2% 60.2%;
+        --destructive-foreground: 210 40% 98%;
+
+        --border: 214.3 31.8% 91.4%;
+        --input: 214.3 31.8% 91.4%;
+        --ring: 221.2 83.2% 53.3%;
+
+        --radius: 0.5rem;
     }
 
-    /* ⭐️ Dark Theme Overrides */
     .dark {
-        --background: #111827;
-        /* Very Dark Blue/Gray */
-        --foreground: #f3f4f6;
-        /* White/Light Gray */
-        --card: #1f2937;
-        /* Slightly Lighter Dark Card */
-        --card-foreground: #f3f4f6;
-        --border: #374151;
-        --primary: #60a5fa;
-        /* Light Blue */
-        --primary-foreground: #1f2937;
-        --secondary: #1f2937;
-        --secondary-foreground: #60a5fa;
-        --muted: #374151;
-        --muted-foreground: #9ca3af;
+        --background: 222.2 84% 4.9%;
+        --foreground: 210 40% 98%;
 
-        /* Custom Variables */
-        --color-text-primary: #f3f4f6;
-        --color-text-secondary: #9ca3af;
+        --card: 222.2 84% 4.9%;
+        --card-foreground: 210 40% 98%;
+
+        --popover: 222.2 84% 4.9%;
+        --popover-foreground: 210 40% 98%;
+
+        --primary: 217.2 91.2% 59.8%;
+        --primary-foreground: 222.2 47.4% 11.2%;
+
+        --secondary: 217.2 32.6% 17.5%;
+        --secondary-foreground: 210 40% 98%;
+
+        --muted: 217.2 32.6% 17.5%;
+        --muted-foreground: 215 20.2% 65.1%;
+
+        --accent: 217.2 32.6% 17.5%;
+        --accent-foreground: 210 40% 98%;
+
+        --destructive: 0 62.8% 30.6%;
+        --destructive-foreground: 210 40% 98%;
+
+        --border: 217.2 32.6% 17.5%;
+        --input: 217.2 32.6% 17.5%;
+        --ring: 212.7 26.8% 83.9%;
+    }
+}
+
+@layer base {
+    * {
+        @apply border-border;
+    }
+
+    body {
+        @apply bg-background text-foreground;
     }
 }
 
@@ -72,7 +98,7 @@ body {
     width: 100%;
     max-width: 393px;
     height: 100dvh;
-    background-color: var(--background);
+    background-color: hsl(var(--background));
     /* ⭐️ 배경 변수 사용 */
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
     display: flex;

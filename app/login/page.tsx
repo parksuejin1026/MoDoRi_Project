@@ -4,9 +4,8 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { BookOpen } from 'lucide-react';
+import { GraduationCap } from 'lucide-react';
 import { useGlobalModal } from '@/components/GlobalModal';
-import ThemeToggle from '@/components/ThemeToggle'; // ⭐️ [추가] ThemeToggle 임포트
 
 export default function LoginPage() {
     const router = useRouter();
@@ -48,27 +47,22 @@ export default function LoginPage() {
 
     return (
         <div className="min-h-screen flex flex-col justify-center items-center p-6 bg-background">
-            {/* ⭐️ [수정] 배경 색상 테마 변수 적용 및 relative 추가 */}
             <div className="w-full max-w-[360px] bg-card rounded-xl border border-border shadow-sm p-6 relative">
 
                 <div className="text-center mb-8 pt-4">
-                    {/* ⭐️ [수정] 버튼 색상 테마 변수 적용 */}
-                    <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mx-auto mb-4 text-primary-foreground">
-                        <BookOpen size={32} />
+                    <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mx-auto mb-4 text-primary-foreground shadow-lg shadow-primary/30">
+                        <GraduationCap size={40} />
                     </div>
-                    {/* ⭐️ [수정] 텍스트 색상 테마 변수 적용 */}
-                    <h1 className="text-3xl font-bold text-primary mb-1">룰룩</h1>
-                    <p className="text-sm text-muted-foreground">Rule-Look</p>
+                    <h1 className="text-3xl font-bold text-primary mb-1">유니메이트</h1>
+                    <p className="text-sm text-muted-foreground">UniMate</p>
                 </div>
 
                 <form onSubmit={handleLogin} className="flex flex-col gap-5">
                     <div className="flex flex-col gap-2">
-                        {/* ⭐️ [수정] 텍스트 색상 테마 변수 적용 */}
                         <label htmlFor="userid" className="text-sm font-medium text-foreground">아이디</label>
                         <input
                             id="userid"
                             type="text"
-                            // ⭐️ [수정] 입력창 테마 변수 적용
                             className="w-full px-4 py-3 border border-border rounded-lg text-sm focus:outline-none focus:border-primary transition-all bg-muted text-foreground"
                             placeholder="아이디를 입력하세요"
                             value={userid}
@@ -78,9 +72,7 @@ export default function LoginPage() {
 
                     <div className="flex flex-col gap-2">
                         <div className="flex justify-between items-center">
-                            {/* ⭐️ [수정] 텍스트 색상 테마 변수 적용 */}
                             <label htmlFor="password" className="text-sm font-medium text-foreground">비밀번호</label>
-                            {/* ⭐️ [수정] 텍스트 색상 테마 변수 적용 */}
                             <Link
                                 href="/reset-password"
                                 className="text-xs text-primary hover:text-primary/70 hover:underline transition-colors"
@@ -91,7 +83,6 @@ export default function LoginPage() {
                         <input
                             id="password"
                             type="password"
-                            // ⭐️ [수정] 입력창 테마 변수 적용
                             className="w-full px-4 py-3 border border-border rounded-lg text-sm focus:outline-none focus:border-primary transition-all bg-muted text-foreground"
                             placeholder="비밀번호를 입력하세요"
                             value={password}
