@@ -25,7 +25,7 @@ export default function TimetablePage() {
     // 상세 모달 상태
     const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
     const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-    const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false); // 삭제 확인 모달 상태
+    const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
 
     // 새 수업 입력 상태
     const [newCourseName, setNewCourseName] = useState('');
@@ -34,7 +34,6 @@ export default function TimetablePage() {
     const [newCourseEnd, setNewCourseEnd] = useState(10);
     const [newCourseLocation, setNewCourseLocation] = useState('');
 
-    // 사용자 ID 로드 및 시간표 데이터 조회
     useEffect(() => {
         if (typeof window !== 'undefined') {
             const storedId = localStorage.getItem('userId');
@@ -124,7 +123,7 @@ export default function TimetablePage() {
     return (
         <div className="flex flex-col h-full bg-background overflow-hidden">
             {/* 헤더 */}
-            <div className="p-6 pb-4 flex justify-between items-center">
+            <div className="p-6 pb-4 flex justify-between items-center bg-background z-10">
                 <div>
                     <h2 className="text-2xl font-bold text-foreground">시간표</h2>
                     <p className="text-sm text-muted-foreground">이번 학기 시간표를 관리하세요.</p>
@@ -139,71 +138,88 @@ export default function TimetablePage() {
 
             {/* 시간표 그리드 */}
             <div className="flex-1 overflow-y-auto p-4 pb-24">
-                <div className="grid grid-cols-6 gap-1 border border-border rounded-xl overflow-hidden bg-card">
-                    {/* 헤더 (요일) */}
-                    <div className="bg-muted p-2 text-center text-xs font-medium text-muted-foreground border-b border-r border-border"></div>
-                    {DAYS.map(day => (
-                        <div key={day} className="bg-muted p-2 text-center text-sm font-bold text-foreground border-b border-border">
+                <div
+                    className="grid border border-border rounded-xl bg-card overflow-hidden"
+                    style={{
+                        // 1열(시간)은 고정 너비(3rem), 나머지 5열(요일)은 균등 분배
+                        gridTemplateColumns: '3rem repeat(5, 1fr)',
+                        // ⭐️ [수정] 셀 높이 축소: 4rem -> 3rem
+                        gridTemplateRows: 'auto repeat(10, 3rem)'
+                    }}
+                >
+                    {/* --- 1. 헤더 (요일) --- */}
+                    <div className="border-b border-r border-border bg-muted/30"></div>
+                    {DAYS.map((day, i) => (
+                        <div key={day} className={`border-b border-border bg-muted/30 p-2 text-center text-sm font-bold text-foreground flex items-center justify-center ${i < 4 ? 'border-r' : ''}`}>
                             {day}
                         </div>
                     ))}
 
-                    {/* 시간 슬롯 */}
-                    {TIMES.map(time => (
-                        <>
-                            {/* 시간 표시 */}
-                            <div key={`time-${time}`} className="bg-muted p-2 text-center text-xs text-muted-foreground border-r border-border h-16 flex items-start justify-center pt-1">
-                                {time}:00
-                            </div>
-
-                            {/* 요일별 셀 */}
-                            {DAYS.map(day => {
-                                // 해당 시간/요일에 수업이 있는지 확인
-                                const course = courses.find(c =>
-                                    c.day === day && c.startTime <= time && c.endTime > time
-                                );
-
-                                // 수업 시작 시간인 경우에만 렌더링 (rowspan 효과)
-                                if (course && course.startTime === time) {
-                                    const duration = course.endTime - course.startTime;
-                                    return (
-                                        <div
-                                            key={`${day}-${time}`}
-                                            className={`p-1 relative z-10`}
-                                            style={{ gridRow: `span ${duration}` }}
-                                        >
-                                            <div className={`w-full h-full rounded-lg p-2 text-xs flex flex-col justify-between ${course.color} border border-black/5 shadow-sm cursor-pointer hover:opacity-90 transition-opacity`}
-                                                onClick={() => handleCourseClick(course)}
-                                            >
-                                                <div>
-                                                    <p className="font-bold text-gray-800 line-clamp-2">{course.name}</p>
-                                                    <p className="text-gray-600 mt-1">{course.location}</p>
-                                                </div>
-                                                <p className="text-gray-500 text-[10px] self-end">{course.startTime}:00 - {course.endTime}:00</p>
-                                            </div>
-                                        </div>
-                                    );
-                                } else if (course) {
-                                    // 수업 중인 시간은 렌더링 하지 않음 (위에서 span으로 처리)
-                                    return null;
-                                } else {
-                                    // 빈 셀
-                                    return (
-                                        <div key={`${day}-${time}`} className="border-b border-r border-border/50 h-16"></div>
-                                    );
-                                }
-                            })}
-                        </>
+                    {/* --- 2. 시간 라벨 (좌측 열) --- */}
+                    {TIMES.map((time, index) => (
+                        <div
+                            key={`time-${time}`}
+                            className="border-r border-b border-border bg-muted/10 text-xs text-muted-foreground flex items-start justify-center pt-1"
+                            style={{ gridRow: index + 2, gridColumn: 1 }}
+                        >
+                            {time}:00
+                        </div>
                     ))}
+
+                    {/* --- 3. 배경 그리드 셀 --- */}
+                    {TIMES.map((time, tIndex) => (
+                        DAYS.map((day, dIndex) => (
+                            <div
+                                key={`cell-${day}-${time}`}
+                                className={`border-b border-border ${dIndex < 4 ? 'border-r' : ''}`}
+                                style={{
+                                    gridRow: tIndex + 2,
+                                    gridColumn: dIndex + 2
+                                }}
+                            />
+                        ))
+                    ))}
+
+                    {/* --- 4. 수업 카드 --- */}
+                    {courses.map((course) => {
+                        const dayIndex = DAYS.indexOf(course.day);
+                        if (dayIndex === -1) return null;
+
+                        const rowStart = (course.startTime - 9) + 2;
+                        const rowSpan = course.endTime - course.startTime;
+
+                        return (
+                            <div
+                                key={course.id}
+                                className={`m-0.5 p-1.5 rounded-lg text-xs flex flex-col justify-between ${course.color} border border-black/5 shadow-sm cursor-pointer hover:opacity-90 transition-opacity z-10 overflow-hidden`}
+                                style={{
+                                    gridColumn: dayIndex + 2,
+                                    gridRow: `${rowStart} / span ${rowSpan}`
+                                }}
+                                onClick={() => handleCourseClick(course)}
+                            >
+                                <div>
+                                    {/* ⭐️ [수정] line-clamp-1 제거, 줄바꿈 허용 */}
+                                    <p className="font-bold text-gray-800 whitespace-normal break-words leading-tight">
+                                        {course.name}
+                                    </p>
+                                    <p className="text-gray-600 mt-0.5 text-[10px] leading-tight line-clamp-1">
+                                        {course.location}
+                                    </p>
+                                </div>
+                            </div>
+                        );
+                    })}
                 </div>
             </div>
 
+            {/* ... (모달 부분 코드는 기존과 동일하게 유지) ... */}
             {/* 수업 추가 모달 */}
             {isModalOpen && (
                 <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
                     <div className="bg-card w-full max-w-sm rounded-2xl shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
                         <div className="p-4 border-b border-border flex justify-between items-center">
-                            <h3 className="font-bold text-lg">수업 추가</h3>
+                            <h3 className="font-bold text-lg text-foreground">수업 추가</h3>
                             <button onClick={() => setIsModalOpen(false)} className="text-muted-foreground hover:text-foreground">
                                 <X size={20} />
                             </button>
@@ -211,34 +227,34 @@ export default function TimetablePage() {
 
                         <div className="p-6 space-y-4">
                             <div>
-                                <label className="text-sm font-medium mb-1 block">과목명</label>
+                                <label className="text-sm font-medium mb-1 block text-foreground">과목명</label>
                                 <input
                                     type="text"
                                     value={newCourseName}
                                     onChange={(e) => setNewCourseName(e.target.value)}
-                                    className="w-full p-2 border border-border rounded-lg bg-background"
+                                    className="w-full p-2 border border-border rounded-lg bg-background text-foreground"
                                     placeholder="예: 컴퓨터구조"
                                 />
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="text-sm font-medium mb-1 block">요일</label>
+                                    <label className="text-sm font-medium mb-1 block text-foreground">요일</label>
                                     <select
                                         value={newCourseDay}
                                         onChange={(e) => setNewCourseDay(e.target.value)}
-                                        className="w-full p-2 border border-border rounded-lg bg-background"
+                                        className="w-full p-2 border border-border rounded-lg bg-background text-foreground"
                                     >
                                         {DAYS.map(day => <option key={day} value={day}>{day}요일</option>)}
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="text-sm font-medium mb-1 block">강의실</label>
+                                    <label className="text-sm font-medium mb-1 block text-foreground">강의실</label>
                                     <input
                                         type="text"
                                         value={newCourseLocation}
                                         onChange={(e) => setNewCourseLocation(e.target.value)}
-                                        className="w-full p-2 border border-border rounded-lg bg-background"
+                                        className="w-full p-2 border border-border rounded-lg bg-background text-foreground"
                                         placeholder="예: 301호"
                                     />
                                 </div>
@@ -246,21 +262,21 @@ export default function TimetablePage() {
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="text-sm font-medium mb-1 block">시작 시간</label>
+                                    <label className="text-sm font-medium mb-1 block text-foreground">시작 시간</label>
                                     <select
                                         value={newCourseStart}
                                         onChange={(e) => setNewCourseStart(Number(e.target.value))}
-                                        className="w-full p-2 border border-border rounded-lg bg-background"
+                                        className="w-full p-2 border border-border rounded-lg bg-background text-foreground"
                                     >
                                         {TIMES.map(t => <option key={t} value={t}>{t}:00</option>)}
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="text-sm font-medium mb-1 block">종료 시간</label>
+                                    <label className="text-sm font-medium mb-1 block text-foreground">종료 시간</label>
                                     <select
                                         value={newCourseEnd}
                                         onChange={(e) => setNewCourseEnd(Number(e.target.value))}
-                                        className="w-full p-2 border border-border rounded-lg bg-background"
+                                        className="w-full p-2 border border-border rounded-lg bg-background text-foreground"
                                     >
                                         {TIMES.filter(t => t > newCourseStart).map(t => <option key={t} value={t}>{t}:00</option>)}
                                     </select>
@@ -326,7 +342,7 @@ export default function TimetablePage() {
             {isDeleteConfirmOpen && (
                 <div className="fixed inset-0 bg-black/50 z-[60] flex items-center justify-center p-4">
                     <div className="bg-card w-full max-w-xs rounded-2xl shadow-xl p-6 animate-in fade-in zoom-in-95 duration-200">
-                        <h3 className="font-bold text-lg text-center mb-2">수업 삭제</h3>
+                        <h3 className="font-bold text-lg text-center mb-2 text-foreground">수업 삭제</h3>
                         <p className="text-center text-muted-foreground mb-6">
                             정말로 이 수업을 삭제하시겠습니까?<br />
                             삭제된 내용은 복구할 수 없습니다.
