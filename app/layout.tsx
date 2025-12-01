@@ -2,7 +2,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import TabBar from '@/components/TabBar';
-import { GraduationCap } from 'lucide-react';
+import { GraduationCap, Bell } from 'lucide-react';
 import '../styles/globals.css';
 import { GlobalModalProvider } from '@/components/GlobalModal';
 import { ThemeProvider } from '@/context/ThemeProvider';
@@ -49,6 +49,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   </div>
                 </Link>
 
+                <Link href="/notifications" className="p-2 text-foreground hover:bg-muted rounded-full transition-colors relative">
+                  <Bell size={24} />
+                  <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-card"></span>
+                </Link>
                 <ThemeToggle className="text-foreground" />
 
               </header>
