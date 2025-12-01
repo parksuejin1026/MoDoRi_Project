@@ -1,5 +1,5 @@
 // 📁 app/layout.tsx
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import TabBar from '@/components/TabBar';
 import Header from '@/components/Header'; // ⭐️ Header 컴포넌트 임포트
 import '../styles/globals.css';
@@ -27,6 +27,13 @@ export const metadata: Metadata = {
     locale: 'ko_KR',
     type: 'website',
   },
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
