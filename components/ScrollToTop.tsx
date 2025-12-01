@@ -44,7 +44,7 @@ export default function ScrollToTop() {
     return (
         <button
             onClick={scrollToTop}
-            className="fixed bottom-24 right-6 p-3 bg-primary text-primary-foreground rounded-full shadow-lg hover:bg-primary/90 transition-all active:scale-90 z-40 animate-in fade-in slide-in-from-bottom-4"
+            className="absolute bottom-24 right-6 p-3 bg-primary text-primary-foreground rounded-full shadow-lg hover:bg-primary/90 transition-all active:scale-90 z-40 animate-in fade-in slide-in-from-bottom-4"
             aria-label="맨 위로 스크롤"
         >
             <ArrowUp size={20} />

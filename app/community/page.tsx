@@ -269,9 +269,10 @@ export default function CommunityPage() {
             <div className="fixed bottom-0 inset-x-0 max-w-[393px] mx-auto z-50 pointer-events-none">
                 <Link
                     href="/community/add"
-                    className="absolute bottom-20 right-6 w-14 h-14 bg-blue-600 text-white rounded-full flex items-center justify-center shadow-lg shadow-blue-600/30 hover:bg-blue-700 transition-all active:scale-90 pointer-events-auto"
+                    className="absolute bottom-20 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-3 py-2 bg-primary text-primary-foreground rounded-full shadow-lg shadow-primary/30 hover:bg-primary/90 transition-all active:scale-90 pointer-events-auto"
                 >
-                    <Plus size={24} />
+                    <Plus size={16} />
+                    <span className="text-sm font-bold">글쓰기</span>
                 </Link>
             </div>
         </div>
