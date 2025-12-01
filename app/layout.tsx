@@ -1,12 +1,10 @@
 // 📁 app/layout.tsx
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import TabBar from '@/components/TabBar';
-import { GraduationCap, Bell } from 'lucide-react';
+import Header from '@/components/Header'; // ⭐️ Header 컴포넌트 임포트
 import '../styles/globals.css';
 import { GlobalModalProvider } from '@/components/GlobalModal';
 import { ThemeProvider } from '@/context/ThemeProvider';
-import ThemeToggle from '@/components/ThemeToggle';
 import { Toaster } from 'sonner';
 import ScrollToTop from '@/components/ScrollToTop';
 
@@ -38,24 +36,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ThemeProvider>
           <GlobalModalProvider>
             <div className="app-container">
-              <header className="bg-card px-6 py-2 flex items-center gap-3 shadow-sm z-30 sticky top-0 border-b border-border">
-                <Link href="/" className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity flex-1">
-                  <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center text-primary-foreground shrink-0">
-                    <GraduationCap size={24} />
-                  </div>
-                  <div>
-                    <h1 className="text-xl font-bold text-primary m-0 leading-none">유니메이트</h1>
-                    <p className="text-xs text-muted-foreground m-0 mt-1">UniMate</p>
-                  </div>
-                </Link>
-
-                <Link href="/notifications" className="p-2 text-foreground hover:bg-muted rounded-full transition-colors relative">
-                  <Bell size={24} />
-                  <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-card"></span>
-                </Link>
-                <ThemeToggle className="text-foreground" />
-
-              </header>
+              {/* ⭐️ 복잡한 헤더 코드 대신 Header 컴포넌트 사용 */}
+              <Header />
 
               <main className="content-area">
                 {children}
