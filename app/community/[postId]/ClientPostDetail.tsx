@@ -29,6 +29,7 @@ interface CommentData {
     author: string;
     content: string;
     createdAt: string;
+    school?: string; // ⭐️ [추가] 학교 정보 필드
 }
 
 
@@ -54,6 +55,9 @@ export default function ClientPostDetail({
     // ⭐️ [추가] 댓글 수정 상태 관리
     const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
     const [editingContent, setEditingContent] = useState('');
+
+    // ⭐️ [추가] 익명 작성 상태
+    const [isAnonymous, setIsAnonymous] = useState(false);
 
 
     useEffect(() => {
@@ -102,7 +106,8 @@ export default function ClientPostDetail({
         }
 
         setIsSubmittingComment(true);
-        const userName = localStorage.getItem('userName') || '익명';
+        // ⭐️ [수정] 익명 여부에 따라 작성자 이름 설정
+        const userName = isAnonymous ? '익명' : (localStorage.getItem('userName') || '익명');
 
         const payload = {
             postId: postData._id,
@@ -123,6 +128,7 @@ export default function ClientPostDetail({
                 const newComment = await response.json();
                 setComments((prev: CommentData[]) => [...prev, newComment.data]);
                 setCommentText('');
+                setIsAnonymous(false); // 작성 후 초기화
 
             } else {
                 const errorData = await response.json();
@@ -301,7 +307,15 @@ export default function ClientPostDetail({
                             return (
                                 <div key={comment._id} className='p-3 bg-muted rounded-xl border border-border'>
                                     <div className='flex justify-between items-start mb-1'>
-                                        <span className='font-medium text-sm text-foreground'>{comment.author}</span>
+                                        <div className="flex items-center gap-2">
+                                            <span className='font-medium text-sm text-foreground'>{comment.author}</span>
+                                            {/* ⭐️ [추가] 학교 배지 표시 */}
+                                            {comment.school && (
+                                                <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-100 text-blue-700 border border-blue-200">
+                                                    {comment.school}
+                                                </span>
+                                            )}
+                                        </div>
                                         {/* ⭐️ 수정/삭제 버튼 */}
                                         {isCommentOwner && (
                                             <div className="flex gap-2 text-xs text-muted-foreground">
@@ -378,13 +392,27 @@ export default function ClientPostDetail({
                         rows={1} // ⭐️ [수정 반영] 한 줄 크기로 줄임
                         className='w-full p-3 bg-muted border border-border text-foreground rounded-xl text-sm resize-none focus:outline-none focus:border-primary transition-all'
                     />
-                    <button
-                        type='submit'
-                        disabled={!currentUserId || isSubmittingComment || !commentText.trim()}
-                        className="mt-2 w-full px-4 py-2 bg-primary text-primary-foreground text-sm font-medium rounded-lg hover:bg-primary/90 disabled:bg-muted-foreground/50 transition-colors"
-                    >
-                        {isSubmittingComment ? '작성 중...' : '댓글 등록'}
-                    </button>
+
+                    {/* ⭐️ [추가] 익명 작성 체크박스 */}
+                    <div className="flex items-center justify-between mt-2">
+                        <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer hover:text-foreground transition-colors">
+                            <input
+                                type="checkbox"
+                                checked={isAnonymous}
+                                onChange={(e) => setIsAnonymous(e.target.checked)}
+                                className="w-4 h-4 rounded border-border text-primary focus:ring-primary/20"
+                            />
+                            <span>익명으로 작성</span>
+                        </label>
+
+                        <button
+                            type='submit'
+                            disabled={!currentUserId || isSubmittingComment || !commentText.trim()}
+                            className="px-4 py-2 bg-primary text-primary-foreground text-sm font-medium rounded-lg hover:bg-primary/90 disabled:bg-muted-foreground/50 transition-colors"
+                        >
+                            {isSubmittingComment ? '작성 중...' : '댓글 등록'}
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>

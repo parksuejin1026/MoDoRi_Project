@@ -1,5 +1,3 @@
-// 📁 app/community/add/page.tsx
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -11,12 +9,12 @@ export default function WritePage() {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [author, setAuthor] = useState('');
-  // ⭐️ [추가] 카테고리 상태 추가
   const [category, setCategory] = useState<'질문' | '정보공유' | '자유'>('자유');
-  const [currentUserId, setCurrentUserId] = useState<string>(''); // ⭐️ 추가
-  const [currentUserEmail, setCurrentUserEmail] = useState<string>(''); // ⭐️ 추가
-  const [currentUserSchool, setCurrentUserSchool] = useState<string>(''); // ⭐️ 추가: 학교 정보
+  const [currentUserId, setCurrentUserId] = useState<string>('');
+  const [currentUserEmail, setCurrentUserEmail] = useState<string>('');
+  const [currentUserSchool, setCurrentUserSchool] = useState<string>('');
 
+  const [isAnonymous, setIsAnonymous] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
 
@@ -25,20 +23,14 @@ export default function WritePage() {
       const storedName = localStorage.getItem('userName');
       const storedId = localStorage.getItem('userId');
       const storedEmail = localStorage.getItem('userEmail');
-      const storedSchool = localStorage.getItem('userSchool'); // ⭐️ 학교 정보 가져오기
+      const storedSchool = localStorage.getItem('userSchool');
 
       if (storedName) setAuthor(storedName);
-      if (storedId) setCurrentUserId(storedId); // ⭐️ 저장
-      if (storedEmail) setCurrentUserEmail(storedEmail); // ⭐️ 저장
-      if (storedSchool) setCurrentUserSchool(storedSchool); // ⭐️ 저장
+      if (storedId) setCurrentUserId(storedId);
+      if (storedEmail) setCurrentUserEmail(storedEmail);
+      if (storedSchool) setCurrentUserSchool(storedSchool);
     }
   }, []);
-
-  // ⭐️ [추가] userId가 없으면 등록 불가
-  if (!currentUserId || !currentUserEmail) {
-    // 렌더링을 막고 로딩 스피너나 리다이렉트를 고려할 수 있습니다.
-    // 현재는 글쓰기 버튼만 비활성화합니다.
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,11 +47,11 @@ export default function WritePage() {
         body: JSON.stringify({
           title,
           content,
-          author: author.trim() || '익명',
-          category, // ⭐️ 카테고리 추가
-          userId: currentUserId, // ⭐️ userId 추가
-          userEmail: currentUserEmail, // ⭐️ userEmail 추가
-          school: currentUserSchool, // ⭐️ school 추가
+          author: isAnonymous ? '' : (author.trim() || '익명'),
+          category,
+          userId: currentUserId,
+          userEmail: currentUserEmail,
+          school: currentUserSchool,
         }),
       });
 
@@ -78,16 +70,17 @@ export default function WritePage() {
   };
 
   return (
-    <div className="flex flex-col h-full bg-card">
+    <div className="flex flex-col h-full bg-card relative">
       {/* 헤더 */}
       <div className="flex items-center justify-between px-6 py-4 border-b border-border sticky top-0 bg-card z-10">
         <Link href="/community" className="flex items-center gap-2 text-muted-foreground hover:bg-accent px-2 py-1 rounded-md transition-colors">
           <ArrowLeft size={20} />
           <span className="text-sm font-medium">취소</span>
         </Link>
+        {/* 상단 완료 버튼 (선택적 유지) */}
         <button
           onClick={handleSubmit}
-          disabled={isSubmitting || !title.trim() || !content.trim() || !currentUserId} // ⭐️ userId 조건 추가
+          disabled={isSubmitting || !title.trim() || !content.trim() || !currentUserId}
           className="px-4 py-2 bg-primary text-primary-foreground text-sm font-medium rounded-lg hover:bg-primary/90 disabled:bg-muted-foreground/50 transition-colors"
         >
           {isSubmitting ? '등록 중...' : '완료'}
@@ -99,30 +92,50 @@ export default function WritePage() {
         <h2 className="text-2xl font-bold text-foreground mb-6">글 작성</h2>
 
         <div className="space-y-6">
-          {/* ⭐️ [수정] 카테고리 선택 필드 */}
-          <div className="space-y-2">
+          {/* ⭐️ [수정] 카테고리 선택 필드 (칩 UI) */}
+          <div className="space-y-3">
             <label className="text-sm font-medium text-foreground">카테고리</label>
-            <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value as '질문' | '정보공유' | '자유')}
-              className="w-full p-3 bg-muted border border-border text-foreground rounded-xl text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all appearance-none"
-            >
-              <option value="자유">자유</option>
-              <option value="질문">질문</option>
-              <option value="정보공유">정보공유</option>
-            </select>
+            <div className="flex gap-2">
+              {(['자유', '질문', '정보공유'] as const).map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setCategory(cat)}
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all active:scale-95 border ${category === cat
+                    ? 'bg-primary text-primary-foreground border-primary shadow-sm'
+                    : 'bg-background text-muted-foreground border-border hover:bg-secondary'
+                    }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
           </div>
 
           <div className="space-y-2">
             <label className="text-sm font-medium text-foreground">작성자</label>
+
             <input
               type="text"
-              value={author}
+              value={isAnonymous ? '익명' : author}
               onChange={(e) => setAuthor(e.target.value)}
-              className="w-full p-3 bg-muted border border-border text-foreground rounded-xl text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all"
+              disabled={isAnonymous}
+              className="w-full p-3 bg-muted border border-border text-foreground rounded-xl text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
               placeholder="닉네임을 입력하세요 (선택)"
             />
-            {currentUserId && <p className='text-xs text-muted-foreground pt-1'>작성자 ID: {currentUserId.substring(0, 8)}...</p>}
+
+            <div className="flex justify-between items-start">
+              {currentUserId && <p className='text-xs text-muted-foreground pt-1'>작성자 ID: {currentUserId.substring(0, 8)}...</p>}
+
+              <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer hover:text-foreground transition-colors pt-1">
+                <input
+                  type="checkbox"
+                  checked={isAnonymous}
+                  onChange={(e) => setIsAnonymous(e.target.checked)}
+                  className="w-4 h-4 rounded border-border text-primary focus:ring-primary/20"
+                />
+                <span>익명으로 작성</span>
+              </label>
+            </div>
           </div>
 
           <div className="space-y-2">
@@ -146,6 +159,17 @@ export default function WritePage() {
             />
           </div>
         </div>
+      </div>
+
+      {/* ⭐️ [추가] 하단 고정 완료 버튼 */}
+      <div className="p-4 border-t border-border bg-card sticky bottom-0 z-20 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
+        <button
+          onClick={handleSubmit}
+          disabled={isSubmitting || !title.trim() || !content.trim() || !currentUserId}
+          className="w-full py-3 bg-primary text-primary-foreground text-base font-bold rounded-xl hover:bg-primary/90 disabled:bg-muted-foreground/50 transition-all shadow-sm active:scale-[0.98]"
+        >
+          {isSubmitting ? '등록 중...' : '작성 완료'}
+        </button>
       </div>
     </div>
   );
