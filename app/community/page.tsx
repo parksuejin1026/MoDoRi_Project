@@ -2,7 +2,7 @@
 'use client';
 
 import Link from 'next/link';
-import { MessageSquare, ThumbsUp, Eye, Clock, Plus, Search } from 'lucide-react';
+import { MessageSquare, ThumbsUp, Eye, Clock, Plus, Search, Image as ImageIcon } from 'lucide-react'; // ⭐️ [수정] ImageIcon 추가
 import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import PullToRefresh from '@/components/PullToRefresh';
@@ -17,6 +17,7 @@ interface PostData {
     school?: string;
     views: number;
     likes: string[];
+    images?: string[]; // ⭐️ [추가] 이미지 배열
     createdAt: string;
     commentCount: number;
     likesCount: number;
@@ -242,6 +243,14 @@ export default function CommunityPage() {
                                             <Eye size={14} />
                                             <span>{post.views || 0}</span>
                                         </div>
+
+                                        {/* ⭐️ [추가] 이미지 포함 여부 표시 */}
+                                        {post.images && post.images.length > 0 && (
+                                            <div className="flex items-center gap-1 text-blue-500">
+                                                <ImageIcon size={14} />
+                                                <span>{post.images.length}</span>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </Link>

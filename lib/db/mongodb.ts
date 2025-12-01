@@ -19,6 +19,7 @@ export interface IPostData {
   category: '전체' | '질문' | '정보공유' | '자유';
   views: number;
   likes: string[];
+  images: string[]; // ⭐️ [추가] 이미지 URL (Base64) 배열
   createdAt: Date;
   updatedAt: Date;
 }
@@ -52,6 +53,31 @@ export interface IChatMessage extends Document {
   createdAt: Date;
 }
 
+// ⭐️ 시간표 인터페이스
+export interface ITimetable extends Document {
+  userId: string;
+  courses: {
+    id: string;
+    name: string;
+    day: string; // '월', '화', '수', '목', '금'
+    startTime: number;
+    endTime: number;
+    location: string;
+    color: string;
+  }[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// ⭐️ 알림 인터페이스
+export interface INotification extends Document {
+  userId: string;
+  type: 'system' | 'comment' | 'like';
+  content: string;
+  isRead: boolean;
+  createdAt: Date;
+}
+
 
 const PostSchema = new Schema<IPost>({
   title: { type: String, required: true, trim: true },
@@ -63,6 +89,7 @@ const PostSchema = new Schema<IPost>({
   category: { type: String, required: true, default: '자유', enum: ['전체', '질문', '정보공유', '자유'] },
   views: { type: Number, default: 0 },
   likes: { type: [String], default: [] },
+  images: { type: [String], default: [] }, // ⭐️ [추가] 이미지 필드
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 }, {
@@ -96,6 +123,31 @@ const ChatMessageSchema = new Schema<IChatMessage>({
   createdAt: { type: Date, default: Date.now },
 });
 
+// ⭐️ 시간표 스키마
+const TimetableSchema = new Schema<ITimetable>({
+  userId: { type: String, required: true, unique: true, index: true },
+  courses: [{
+    id: String,
+    name: String,
+    day: String,
+    startTime: Number,
+    endTime: Number,
+    location: String,
+    color: String
+  }],
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now },
+}, { timestamps: true });
+
+// ⭐️ 알림 스키마
+const NotificationSchema = new Schema<INotification>({
+  userId: { type: String, required: true, index: true },
+  type: { type: String, required: true, enum: ['system', 'comment', 'like'] },
+  content: { type: String, required: true },
+  isRead: { type: Boolean, default: false },
+  createdAt: { type: Date, default: Date.now },
+});
+
 
 let cached = (global as any).mongoose;
 
@@ -108,6 +160,8 @@ const PostModel = (mongoose.models.Post || mongoose.model<IPost>('Post', PostSch
 const CommentModel = (mongoose.models.Comment || mongoose.model<IComment>('Comment', CommentSchema)) as Model<IComment>;
 const ChatSessionModel = (mongoose.models.ChatSession || mongoose.model<IChatSession>('ChatSession', ChatSessionSchema)) as Model<IChatSession>;
 const ChatMessageModel = (mongoose.models.ChatMessage || mongoose.model<IChatMessage>('ChatMessage', ChatMessageSchema)) as Model<IChatMessage>;
+const TimetableModel = (mongoose.models.Timetable || mongoose.model<ITimetable>('Timetable', TimetableSchema)) as Model<ITimetable>;
+const NotificationModel = (mongoose.models.Notification || mongoose.model<INotification>('Notification', NotificationSchema)) as Model<INotification>;
 
 
 async function dbConnect() {
@@ -135,4 +189,4 @@ async function dbConnect() {
   return cached.conn;
 }
 
-export { dbConnect as default, PostModel, CommentModel, ChatSessionModel, ChatMessageModel };
+export { dbConnect as default, PostModel, CommentModel, ChatSessionModel, ChatMessageModel, TimetableModel, NotificationModel };

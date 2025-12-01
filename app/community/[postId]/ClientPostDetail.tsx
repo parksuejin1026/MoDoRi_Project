@@ -1,14 +1,12 @@
 // 📁 app/community/[postId]/ClientPostDetail.tsx
 'use client';
-// ⭐️ [필수] 클라이언트 컴포넌트 선언
 
 import Link from 'next/link';
-// ⭐️ [점검] 표준 ES 모듈 임포트 유지
 import { useRouter } from 'next/navigation';
-import { useState, useEffect, useCallback } from 'react'; // ⭐️ useCallback, useEffect 임포트
-import { ArrowLeft, ThumbsUp, MessageSquare, Edit, Trash, Check, X } from 'lucide-react'; // ⭐️ Trash, Check, X 아이콘 임포트
+import { useState, useEffect, useCallback } from 'react';
+import { ArrowLeft, ThumbsUp, MessageSquare, Edit, Trash, Check, X } from 'lucide-react';
 import DeleteButton from '@/components/DeleteButton';
-import { useGlobalModal } from '@/components/GlobalModal'; // ⭐️ Global Modal Hook 임포트
+import { useGlobalModal } from '@/components/GlobalModal';
 
 interface PostData {
     _id: string;
@@ -19,6 +17,7 @@ interface PostData {
     userId: string;
     views: number;
     likes: string[];
+    images?: string[]; // ⭐️ [추가] 이미지 배열
     createdAt: string;
 }
 
@@ -29,9 +28,8 @@ interface CommentData {
     author: string;
     content: string;
     createdAt: string;
-    school?: string; // ⭐️ [추가] 학교 정보 필드
+    school?: string;
 }
-
 
 export default function ClientPostDetail({
     initialPost,
@@ -42,9 +40,8 @@ export default function ClientPostDetail({
     initialComments: CommentData[],
     postId: string
 }) {
-    // ⭐️ 훅들을 안전하게 사용합니다.
     const router = useRouter();
-    const { showAlert, showConfirm } = useGlobalModal(); // ⭐️ Global Modal Hook 사용
+    const { showAlert, showConfirm } = useGlobalModal();
     const [postData, setPostData] = useState<PostData>(initialPost);
     const [comments, setComments] = useState<CommentData[]>(initialComments);
     const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -52,13 +49,9 @@ export default function ClientPostDetail({
     const [commentText, setCommentText] = useState('');
     const [isSubmittingComment, setIsSubmittingComment] = useState(false);
 
-    // ⭐️ [추가] 댓글 수정 상태 관리
     const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
     const [editingContent, setEditingContent] = useState('');
-
-    // ⭐️ [추가] 익명 작성 상태
     const [isAnonymous, setIsAnonymous] = useState(false);
-
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
@@ -67,7 +60,6 @@ export default function ClientPostDetail({
         }
     }, []);
 
-    // 좋아요 기능 로직 (기존 유지)
     const handleLike = async () => {
         if (!currentUserId || !postData) {
             showAlert('로그인이 필요합니다.');
@@ -97,7 +89,6 @@ export default function ClientPostDetail({
         }
     };
 
-    // 댓글 등록 로직 (기존 유지)
     const handleCommentSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!commentText.trim() || !currentUserId || !postData) {
@@ -106,7 +97,6 @@ export default function ClientPostDetail({
         }
 
         setIsSubmittingComment(true);
-        // ⭐️ [수정] 익명 여부에 따라 작성자 이름 설정
         const userName = isAnonymous ? '익명' : (localStorage.getItem('userName') || '익명');
 
         const payload = {
@@ -128,8 +118,7 @@ export default function ClientPostDetail({
                 const newComment = await response.json();
                 setComments((prev: CommentData[]) => [...prev, newComment.data]);
                 setCommentText('');
-                setIsAnonymous(false); // 작성 후 초기화
-
+                setIsAnonymous(false);
             } else {
                 const errorData = await response.json();
                 console.error("Comment API failed. Status:", response.status, "Error:", errorData);
@@ -143,7 +132,6 @@ export default function ClientPostDetail({
         }
     };
 
-    // ⭐️ [추가] 댓글 수정 모드 시작
     const handleStartEdit = (comment: CommentData) => {
         if (currentUserId !== comment.userId) {
             showAlert('본인의 댓글만 수정할 수 있습니다.');
@@ -153,7 +141,6 @@ export default function ClientPostDetail({
         setEditingContent(comment.content);
     };
 
-    // ⭐️ [추가] 댓글 수정 제출
     const handleEditSubmit = useCallback(async (commentId: string) => {
         if (!editingContent.trim()) {
             showAlert('수정할 내용을 입력해주세요.');
@@ -169,7 +156,7 @@ export default function ClientPostDetail({
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     content: editingContent,
-                    currentUserId // 권한 검증용 ID
+                    currentUserId
                 }),
             });
 
@@ -191,7 +178,6 @@ export default function ClientPostDetail({
         }
     }, [editingContent, currentUserId, showAlert, showConfirm]);
 
-    // ⭐️ [추가] 댓글 삭제
     const handleDeleteComment = useCallback(async (commentId: string) => {
         const confirmed = await showConfirm('정말로 이 댓글을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.', '삭제 확인', true);
         if (!confirmed) return;
@@ -200,7 +186,7 @@ export default function ClientPostDetail({
             const response = await fetch(`/api/comments/${commentId}`, {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ currentUserId }), // 권한 검증용 ID
+                body: JSON.stringify({ currentUserId }),
             });
 
             if (response.ok) {
@@ -218,13 +204,11 @@ export default function ClientPostDetail({
         }
     }, [currentUserId, showAlert, showConfirm]);
 
-
     const isOwner = currentUserId && currentUserId === postData.userId;
     const isLikedByUser = (postData.likes || []).includes(currentUserId || '');
 
     return (
         <div className="flex flex-col h-full bg-background overflow-y-auto pb-100">
-            {/* 헤더 (기존 유지) */}
             <div className="bg-card border-b border-border px-6 py-3 sticky top-0 z-10">
                 <Link href="/community" className="flex items-center gap-2 text-muted-foreground hover:bg-accent w-fit px-2 py-1 rounded-md transition-colors">
                     <ArrowLeft size={20} />
@@ -232,9 +216,7 @@ export default function ClientPostDetail({
                 </Link>
             </div>
 
-            {/* 게시글 본문 */}
             <div className="bg-card border-b border-border p-6 mb-2">
-                {/* 카테고리 & 학교 배지 */}
                 <div className="flex items-center gap-2 mb-3">
                     <span className="px-2 py-1 rounded text-xs font-medium border bg-blue-50 text-blue-600 border-blue-100">
                         {postData.category}
@@ -248,18 +230,31 @@ export default function ClientPostDetail({
                     {postData.content}
                 </p>
 
+                {/* ⭐️ [추가] 이미지 갤러리 */}
+                {postData.images && postData.images.length > 0 && (
+                    <div className="flex gap-2 overflow-x-auto pb-4 mb-6 scrollbar-hide">
+                        {postData.images.map((img, index) => (
+                            <div key={index} className="flex-shrink-0 rounded-xl overflow-hidden border border-border">
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img
+                                    src={img}
+                                    alt={`post-image-${index}`}
+                                    className="h-64 w-auto object-cover"
+                                />
+                            </div>
+                        ))}
+                    </div>
+                )}
+
                 <div className="flex items-center gap-2 text-xs text-muted-foreground mb-6">
                     <span className="font-medium text-foreground">{postData.author}</span>
                     <span>•</span>
                     <span>{new Date(postData.createdAt).toLocaleDateString()}</span>
-                    {/* ⭐️ 조회수 표시 */}
                     <span>•</span>
                     <span>조회 {postData.views}</span>
                 </div>
 
-                {/* 액션 버튼 */}
                 <div className="flex items-center justify-between pt-4 border-t border-border">
-                    {/* ⭐️ 좋아요 기능 및 개수 표시 */}
                     <button
                         onClick={handleLike}
                         disabled={!currentUserId}
@@ -274,7 +269,6 @@ export default function ClientPostDetail({
                         <span>좋아요 {(postData.likes || []).length}</span>
                     </button>
 
-                    {/* 수정/삭제 버튼 그룹화 */}
                     <div className="flex gap-2 items-center">
                         {isOwner && (
                             <Link
@@ -285,19 +279,16 @@ export default function ClientPostDetail({
                                 <span>수정</span>
                             </Link>
                         )}
-                        {/* ⭐️ 게시물 삭제 (본인만 가능) */}
                         <DeleteButton postId={postData._id} postUserId={postData.userId} />
                     </div>
                 </div>
             </div>
 
-            {/* ⭐️ 댓글 영역 */}
             <div className="bg-card p-6 flex-1">
                 <h3 className="font-bold text-foreground mb-4 flex items-center gap-1">
                     댓글 <span className="text-primary">{comments.length}</span>
                 </h3>
 
-                {/* 댓글 목록 */}
                 <div className='space-y-4 mb-6'>
                     {comments.length > 0 ? (
                         comments.map((comment: CommentData) => {
@@ -309,18 +300,15 @@ export default function ClientPostDetail({
                                     <div className='flex justify-between items-start mb-1'>
                                         <div className="flex items-center gap-2">
                                             <span className='font-medium text-sm text-foreground'>{comment.author}</span>
-                                            {/* ⭐️ [추가] 학교 배지 표시 */}
                                             {comment.school && (
                                                 <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-100 text-blue-700 border border-blue-200">
                                                     {comment.school}
                                                 </span>
                                             )}
                                         </div>
-                                        {/* ⭐️ 수정/삭제 버튼 */}
                                         {isCommentOwner && (
                                             <div className="flex gap-2 text-xs text-muted-foreground">
                                                 {isEditing ? (
-                                                    // 수정 중일 때
                                                     <div className='flex gap-1'>
                                                         <button
                                                             onClick={() => handleEditSubmit(comment._id)}
@@ -336,7 +324,6 @@ export default function ClientPostDetail({
                                                         </button>
                                                     </div>
                                                 ) : (
-                                                    // 일반 상태일 때
                                                     <div className='flex gap-1'>
                                                         <button
                                                             onClick={() => handleStartEdit(comment)}
@@ -356,12 +343,11 @@ export default function ClientPostDetail({
                                         )}
                                     </div>
 
-                                    {/* ⭐️ 댓글 내용 (수정 가능/불가능) - rows={1} 적용 */}
                                     {isEditing ? (
                                         <textarea
                                             value={editingContent}
                                             onChange={(e) => setEditingContent(e.target.value)}
-                                            rows={1} // ⭐️ [수정 반영] 한 줄 크기로 줄임
+                                            rows={1}
                                             className='w-full p-2 bg-card border border-primary/50 text-foreground rounded-lg text-sm resize-none focus:outline-none'
                                         />
                                     ) : (
@@ -382,18 +368,16 @@ export default function ClientPostDetail({
                     )}
                 </div>
 
-                {/* 댓글 작성 폼 */}
                 <form onSubmit={handleCommentSubmit} className='mt-4 pt-4 border-t border-border'>
                     <textarea
                         value={commentText}
                         onChange={(e) => setCommentText(e.target.value)}
                         placeholder={currentUserId ? '댓글을 입력하세요...' : '댓글을 작성하려면 로그인하세요.'}
                         disabled={!currentUserId || isSubmittingComment}
-                        rows={1} // ⭐️ [수정 반영] 한 줄 크기로 줄임
+                        rows={1}
                         className='w-full p-3 bg-muted border border-border text-foreground rounded-xl text-sm resize-none focus:outline-none focus:border-primary transition-all'
                     />
 
-                    {/* ⭐️ [추가] 익명 작성 체크박스 */}
                     <div className="flex items-center justify-between mt-2">
                         <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer hover:text-foreground transition-colors">
                             <input

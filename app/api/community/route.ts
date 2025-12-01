@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
     // ... (기존 POST 로직 유지)
     try {
         const body = await req.json();
-        const { title, content, author, userId, userEmail, category, school } = body;
+        const { title, content, author, userId, userEmail, category, school, images } = body; // ⭐️ [수정] images 필드 추가
 
         // ⭐️ [수정] author 필드 검사 제거 (익명일 경우 빈 문자열이 올 수 있음)
         if (!title || !content || !userId || !userEmail || !category) {
@@ -38,6 +38,7 @@ export async function POST(req: NextRequest) {
             userEmail,
             category,
             school,
+            images: images || [], // ⭐️ [추가] 이미지 배열 저장
             views: 0,
             likes: [],
             createdAt: new Date(),

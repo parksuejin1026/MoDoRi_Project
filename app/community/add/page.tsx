@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Image as ImageIcon, X } from 'lucide-react';
 
 export default function WritePage() {
   const [title, setTitle] = useState('');
@@ -13,6 +13,7 @@ export default function WritePage() {
   const [currentUserId, setCurrentUserId] = useState<string>('');
   const [currentUserEmail, setCurrentUserEmail] = useState<string>('');
   const [currentUserSchool, setCurrentUserSchool] = useState<string>('');
+  const [images, setImages] = useState<string[]>([]);
 
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -31,6 +32,33 @@ export default function WritePage() {
       if (storedSchool) setCurrentUserSchool(storedSchool);
     }
   }, []);
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+
+    const newImages: string[] = [];
+    const maxImages = 5;
+
+    if (images.length + files.length > maxImages) {
+      alert(`최대 ${maxImages}장까지만 업로드할 수 있습니다.`);
+      return;
+    }
+
+    Array.from(files).forEach(file => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (typeof reader.result === 'string') {
+          setImages(prev => [...prev, reader.result as string]);
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const removeImage = (index: number) => {
+    setImages(prev => prev.filter((_, i) => i !== index));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,6 +80,7 @@ export default function WritePage() {
           userId: currentUserId,
           userEmail: currentUserEmail,
           school: currentUserSchool,
+          images,
         }),
       });
 
@@ -92,7 +121,7 @@ export default function WritePage() {
         <h2 className="text-2xl font-bold text-foreground mb-6">글 작성</h2>
 
         <div className="space-y-6">
-          {/* ⭐️ [수정] 카테고리 선택 필드 (칩 UI) */}
+          {/* 카테고리 선택 필드 (칩 UI) */}
           <div className="space-y-3">
             <label className="text-sm font-medium text-foreground">카테고리</label>
             <div className="flex gap-2">
@@ -158,10 +187,50 @@ export default function WritePage() {
               placeholder="내용을 입력하세요"
             />
           </div>
+
+          {/* 이미지 업로드 및 미리보기 */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <label className="text-sm font-medium text-foreground flex items-center gap-2">
+                사진 첨부
+                <span className="text-xs text-muted-foreground font-normal">
+                  ({images.length}/5)
+                </span>
+              </label>
+              <label className="cursor-pointer px-3 py-1.5 bg-secondary text-secondary-foreground text-xs font-medium rounded-lg hover:bg-secondary/80 transition-colors flex items-center gap-1">
+                <ImageIcon size={14} />
+                사진 추가
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  className="hidden"
+                  onChange={handleImageUpload}
+                />
+              </label>
+            </div>
+
+            {images.length > 0 && (
+              <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+                {images.map((img, index) => (
+                  <div key={index} className="relative w-24 h-24 flex-shrink-0 rounded-xl overflow-hidden border border-border">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={img} alt={`preview-${index}`} className="w-full h-full object-cover" />
+                    <button
+                      onClick={() => removeImage(index)}
+                      className="absolute top-1 right-1 w-6 h-6 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-black/70 transition-colors"
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* ⭐️ [추가] 하단 고정 완료 버튼 */}
+      {/* 하단 고정 완료 버튼 */}
       <div className="p-4 border-t border-border bg-card sticky bottom-0 z-20 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
         <button
           onClick={handleSubmit}
