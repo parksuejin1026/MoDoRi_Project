@@ -1,6 +1,7 @@
 import { OpenAIStream, StreamingTextResponse } from 'ai';
 import OpenAI from 'openai';
 import { loadRuleDataFromSheet } from '@/lib/google-sheet-loader';
+import dbConnect, { ChatMessageModel, ChatSessionModel } from '@/lib/db/mongodb';
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
@@ -10,7 +11,7 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request, { params }: { params: { schoolCode: string } }) {
     try {
-        const { messages } = await req.json();
+        const { messages, sessionId } = await req.json();
         const { schoolCode } = params;
 
         // 학칙 데이터 로드 (여기서 학칙 시트 ID를 사용함)
@@ -29,6 +30,19 @@ export async function POST(req: Request, { params }: { params: { schoolCode: str
       ${coreRuleData}
     `;
 
+        // ⭐️ 사용자 메시지 저장
+        if (sessionId) {
+            await dbConnect();
+            const lastUserMessage = messages[messages.length - 1];
+            if (lastUserMessage.role === 'user') {
+                await ChatMessageModel.create({
+                    sessionId,
+                    role: 'user',
+                    content: lastUserMessage.content,
+                });
+            }
+        }
+
         const response = await openai.chat.completions.create({
             model: 'gpt-4o-mini',
             stream: true,
@@ -39,7 +53,22 @@ export async function POST(req: Request, { params }: { params: { schoolCode: str
             temperature: 0.3,
         });
 
-        const stream = OpenAIStream(response as any);
+        const stream = OpenAIStream(response as any, {
+            onCompletion: async (completion) => {
+                // ⭐️ AI 응답 저장
+                if (sessionId) {
+                    await dbConnect();
+                    await ChatMessageModel.create({
+                        sessionId,
+                        role: 'assistant',
+                        content: completion,
+                    });
+
+                    // 세션 업데이트 시간 갱신
+                    await ChatSessionModel.findByIdAndUpdate(sessionId, { updatedAt: new Date() });
+                }
+            },
+        });
         return new StreamingTextResponse(stream);
 
     } catch (error: any) {

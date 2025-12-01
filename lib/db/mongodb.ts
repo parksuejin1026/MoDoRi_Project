@@ -8,30 +8,47 @@ if (!MONGODB_URI) {
   throw new Error('Please define the MONGODB_URI environment variable inside .env.local');
 }
 
-// 게시물 인터페이스에 userId, userEmail, category, likes, school 추가
+// 게시물 인터페이스
 export interface IPostData {
   title: string;
   content: string;
   author: string;
-  userId: string; // 작성자 고유 ID
-  userEmail: string; // 작성자 이메일 (권한 확인용)
-  school?: string; // ⭐️ 추가: 작성자 학교 (기존 데이터 호환을 위해 optional)
-  category: '전체' | '질문' | '정보공유' | '자유'; // 카테고리
+  userId: string;
+  userEmail: string;
+  school?: string;
+  category: '전체' | '질문' | '정보공유' | '자유';
   views: number;
-  likes: string[]; // 좋아요를 누른 사용자 ID 목록
+  likes: string[];
   createdAt: Date;
   updatedAt: Date;
 }
 
 export interface IPost extends IPostData, Document { }
 
-// 댓글 인터페이스 (답글 기능 구현을 위해 추가)
+// 댓글 인터페이스
 export interface IComment extends Document {
   postId: Types.ObjectId;
   userId: string;
   author: string;
   content: string;
-  school?: string; // ⭐️ 추가: 작성자 학교
+  school?: string;
+  createdAt: Date;
+}
+
+// ⭐️ 채팅 세션 인터페이스
+export interface IChatSession extends Document {
+  userId: string;
+  schoolCode: string;
+  title: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// ⭐️ 채팅 메시지 인터페이스
+export interface IChatMessage extends Document {
+  sessionId: Types.ObjectId;
+  role: 'user' | 'assistant';
+  content: string;
   createdAt: Date;
 }
 
@@ -42,7 +59,7 @@ const PostSchema = new Schema<IPost>({
   author: { type: String, required: true },
   userId: { type: String, required: true, index: true },
   userEmail: { type: String, required: true },
-  school: { type: String, required: false }, // ⭐️ 학교 필드 추가
+  school: { type: String, required: false },
   category: { type: String, required: true, default: '자유', enum: ['전체', '질문', '정보공유', '자유'] },
   views: { type: Number, default: 0 },
   likes: { type: [String], default: [] },
@@ -58,7 +75,24 @@ const CommentSchema = new Schema<IComment>({
   userId: { type: String, required: true, index: true },
   author: { type: String, required: true },
   content: { type: String, required: true },
-  school: { type: String, required: false }, // ⭐️ 학교 필드 추가
+  school: { type: String, required: false },
+  createdAt: { type: Date, default: Date.now },
+});
+
+// ⭐️ 채팅 세션 스키마
+const ChatSessionSchema = new Schema<IChatSession>({
+  userId: { type: String, required: true, index: true },
+  schoolCode: { type: String, required: true },
+  title: { type: String, required: true },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now },
+});
+
+// ⭐️ 채팅 메시지 스키마
+const ChatMessageSchema = new Schema<IChatMessage>({
+  sessionId: { type: Schema.Types.ObjectId, ref: 'ChatSession', required: true, index: true },
+  role: { type: String, required: true, enum: ['user', 'assistant'] },
+  content: { type: String, required: true },
   createdAt: { type: Date, default: Date.now },
 });
 
@@ -72,6 +106,8 @@ if (!cached) {
 // 모델 정의
 const PostModel = (mongoose.models.Post || mongoose.model<IPost>('Post', PostSchema)) as Model<IPost>;
 const CommentModel = (mongoose.models.Comment || mongoose.model<IComment>('Comment', CommentSchema)) as Model<IComment>;
+const ChatSessionModel = (mongoose.models.ChatSession || mongoose.model<IChatSession>('ChatSession', ChatSessionSchema)) as Model<IChatSession>;
+const ChatMessageModel = (mongoose.models.ChatMessage || mongoose.model<IChatMessage>('ChatMessage', ChatMessageSchema)) as Model<IChatMessage>;
 
 
 async function dbConnect() {
@@ -99,4 +135,4 @@ async function dbConnect() {
   return cached.conn;
 }
 
-export { dbConnect as default, PostModel, CommentModel };
+export { dbConnect as default, PostModel, CommentModel, ChatSessionModel, ChatMessageModel };

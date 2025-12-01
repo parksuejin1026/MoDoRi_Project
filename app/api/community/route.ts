@@ -22,7 +22,8 @@ export async function POST(req: NextRequest) {
         const body = await req.json();
         const { title, content, author, userId, userEmail, category, school } = body;
 
-        if (!title || !content || !author || !userId || !userEmail || !category) {
+        // ⭐️ [수정] author 필드 검사 제거 (익명일 경우 빈 문자열이 올 수 있음)
+        if (!title || !content || !userId || !userEmail || !category) {
             return NextResponse.json(
                 { success: false, error: '필수 입력 항목이 누락되었습니다.' },
                 { status: 400 }
@@ -32,7 +33,7 @@ export async function POST(req: NextRequest) {
         const newPostData: IPostData = {
             title,
             content,
-            author,
+            author: author || '익명', // ⭐️ author가 없으면 '익명'으로 저장
             userId,
             userEmail,
             category,
