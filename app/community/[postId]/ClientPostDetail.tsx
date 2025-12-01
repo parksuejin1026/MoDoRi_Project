@@ -17,7 +17,7 @@ interface PostData {
     userId: string;
     views: number;
     likes: string[];
-    images?: string[]; // ⭐️ [추가] 이미지 배열
+    images?: string[];
     createdAt: string;
 }
 
@@ -208,7 +208,8 @@ export default function ClientPostDetail({
     const isLikedByUser = (postData.likes || []).includes(currentUserId || '');
 
     return (
-        <div className="flex flex-col h-full bg-background overflow-y-auto pb-100">
+        // ⭐️ [수정] h-full, overflow-y-auto 제거 / min-h-full, pb-24 추가
+        <div className="flex flex-col min-h-full bg-background pb-24">
             <div className="bg-card border-b border-border px-6 py-3 sticky top-0 z-10">
                 <Link href="/community" className="flex items-center gap-2 text-muted-foreground hover:bg-accent w-fit px-2 py-1 rounded-md transition-colors">
                     <ArrowLeft size={20} />
@@ -230,7 +231,6 @@ export default function ClientPostDetail({
                     {postData.content}
                 </p>
 
-                {/* ⭐️ [추가] 이미지 갤러리 */}
                 {postData.images && postData.images.length > 0 && (
                     <div className="flex gap-2 overflow-x-auto pb-4 mb-6 scrollbar-hide">
                         {postData.images.map((img, index) => (

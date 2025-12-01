@@ -1,5 +1,3 @@
-// 📁 app/community/[postId]/edit/page.tsx
-
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
@@ -14,8 +12,8 @@ interface PostData {
     title: string;
     content: string;
     author: string;
-    category: '질문' | '정보공유' | '자유'; // ⭐️ 추가
-    userId: string; // ⭐️ 추가
+    category: '질문' | '정보공유' | '자유';
+    userId: string;
 }
 
 interface EditPageProps {
@@ -32,9 +30,9 @@ export default function EditPage({ params }: EditPageProps) {
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
     const [author, setAuthor] = useState('');
-    const [category, setCategory] = useState<'질문' | '정보공유' | '자유'>('자유'); // ⭐️ 추가
+    const [category, setCategory] = useState<'질문' | '정보공유' | '자유'>('자유');
 
-    const [currentUserId, setCurrentUserId] = useState<string | null>(null); // ⭐️ 현재 사용자 ID
+    const [currentUserId, setCurrentUserId] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -62,7 +60,6 @@ export default function EditPage({ params }: EditPageProps) {
                 const result = await response.json();
                 const post: PostData = result.data;
 
-                // ⭐️ [수정] 권한 확인
                 if (post.userId !== userId) {
                     showAlert('본인의 게시물만 수정할 수 있습니다.');
                     router.replace(`/community/${postId}`);
@@ -72,7 +69,7 @@ export default function EditPage({ params }: EditPageProps) {
                 setTitle(post.title);
                 setContent(post.content);
                 setAuthor(post.author);
-                setCategory(post.category); // ⭐️ 카테고리 설정
+                setCategory(post.category);
 
             } catch (err: any) {
                 console.error("게시글 로드 오류:", err.message);
@@ -85,7 +82,6 @@ export default function EditPage({ params }: EditPageProps) {
         if (storedId !== null) {
             fetchPost(storedId);
         } else {
-            // userId가 null이면 로딩을 멈추고 로그인 화면으로 리다이렉트
             setIsLoading(false);
             showAlert('로그인 정보가 없습니다.', '권한 오류');
             router.replace('/login');
@@ -111,7 +107,6 @@ export default function EditPage({ params }: EditPageProps) {
         setIsSubmitting(true);
 
         try {
-            // ⭐️ [수정] PUT 요청 시 currentUserId와 category를 함께 전달합니다.
             const response = await fetch(`/api/community/${postId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
@@ -120,7 +115,7 @@ export default function EditPage({ params }: EditPageProps) {
                     content,
                     author,
                     category,
-                    currentUserId, // ⭐️ 권한 확인을 위해 전달
+                    currentUserId,
                 }),
             });
 
@@ -139,9 +134,8 @@ export default function EditPage({ params }: EditPageProps) {
         } finally {
             setIsSubmitting(false);
         }
-    }, [title, content, author, category, currentUserId, postId, router, showAlert]); // ⭐️ 의존성 배열 업데이트
+    }, [title, content, author, category, currentUserId, postId, router, showAlert]);
 
-    // 로딩 및 에러 상태 처리
     if (isLoading) {
         return <div className="text-center my-12 text-muted-foreground">데이터 로딩 중...</div>;
     }
@@ -155,18 +149,21 @@ export default function EditPage({ params }: EditPageProps) {
         );
     }
 
-    // ⭐️ 로딩이 끝났고 에러도 없지만, currentUserId와 post.userId가 다를 경우 이미 리다이렉션 되었을 것이므로 여기서는 폼을 보여줍니다.
-
     return (
-        <div className="max-w-[700px] mx-auto p-6 min-h-screen">
+        // ⭐️ [수정] min-h-screen 대신 min-h-full 사용, pb-24 추가하여 하단 탭바 공간 확보
+        <div className="max-w-[700px] mx-auto p-6 min-h-full pb-24">
 
-            <h1 className="text-2xl font-bold mb-6 text-foreground">
-                게시글 수정: {title}
-            </h1>
+            <div className="flex items-center gap-2 mb-6">
+                <Link href={`/community/${postId}`} className="text-muted-foreground hover:bg-accent p-1 rounded transition-colors">
+                    <ArrowLeft size={24} />
+                </Link>
+                <h1 className="text-2xl font-bold text-foreground">
+                    게시글 수정
+                </h1>
+            </div>
 
             <form onSubmit={handleSubmit} className="flex flex-col gap-6">
 
-                {/* 작성자 입력 필드 (비활성화 상태) */}
                 <div className="space-y-2">
                     <label className="block font-semibold text-foreground">작성자</label>
                     <input
@@ -178,7 +175,6 @@ export default function EditPage({ params }: EditPageProps) {
                     />
                 </div>
 
-                {/* ⭐️ [추가] 카테고리 선택 필드 */}
                 <div className="space-y-2">
                     <label className="block font-semibold text-foreground">카테고리</label>
                     <select
@@ -194,7 +190,6 @@ export default function EditPage({ params }: EditPageProps) {
                 </div>
 
 
-                {/* 제목 입력 필드 */}
                 <div className="space-y-2">
                     <label className="block font-semibold text-foreground">제목</label>
                     <input
@@ -207,7 +202,6 @@ export default function EditPage({ params }: EditPageProps) {
                     />
                 </div>
 
-                {/* 내용 입력 필드 */}
                 <div className="space-y-2">
                     <label className="block font-semibold text-foreground">내용</label>
                     <textarea
@@ -220,7 +214,6 @@ export default function EditPage({ params }: EditPageProps) {
                     />
                 </div>
 
-                {/* 액션 버튼 */}
                 <div className="flex justify-end gap-3 mt-4">
                     <Link
                         href={`/community/${postId}`}

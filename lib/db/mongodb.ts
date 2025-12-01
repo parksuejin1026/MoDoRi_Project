@@ -19,7 +19,7 @@ export interface IPostData {
   category: '전체' | '질문' | '정보공유' | '자유';
   views: number;
   likes: string[];
-  images: string[]; // ⭐️ [추가] 이미지 URL (Base64) 배열
+  images: string[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -36,7 +36,7 @@ export interface IComment extends Document {
   createdAt: Date;
 }
 
-// ⭐️ 채팅 세션 인터페이스
+// 채팅 세션 인터페이스
 export interface IChatSession extends Document {
   userId: string;
   schoolCode: string;
@@ -45,7 +45,7 @@ export interface IChatSession extends Document {
   updatedAt: Date;
 }
 
-// ⭐️ 채팅 메시지 인터페이스
+// 채팅 메시지 인터페이스
 export interface IChatMessage extends Document {
   sessionId: Types.ObjectId;
   role: 'user' | 'assistant';
@@ -53,7 +53,7 @@ export interface IChatMessage extends Document {
   createdAt: Date;
 }
 
-// ⭐️ 시간표 인터페이스
+// 시간표 인터페이스
 export interface ITimetable extends Document {
   userId: string;
   courses: {
@@ -69,12 +69,13 @@ export interface ITimetable extends Document {
   updatedAt: Date;
 }
 
-// ⭐️ 알림 인터페이스
+// ⭐️ 알림 인터페이스 (수정됨: relatedUrl 추가)
 export interface INotification extends Document {
   userId: string;
   type: 'system' | 'comment' | 'like';
   content: string;
   isRead: boolean;
+  relatedUrl?: string; // ⭐️ 이동할 링크 주소
   createdAt: Date;
 }
 
@@ -89,7 +90,7 @@ const PostSchema = new Schema<IPost>({
   category: { type: String, required: true, default: '자유', enum: ['전체', '질문', '정보공유', '자유'] },
   views: { type: Number, default: 0 },
   likes: { type: [String], default: [] },
-  images: { type: [String], default: [] }, // ⭐️ [추가] 이미지 필드
+  images: { type: [String], default: [] },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 }, {
@@ -106,7 +107,7 @@ const CommentSchema = new Schema<IComment>({
   createdAt: { type: Date, default: Date.now },
 });
 
-// ⭐️ 채팅 세션 스키마
+// 채팅 세션 스키마
 const ChatSessionSchema = new Schema<IChatSession>({
   userId: { type: String, required: true, index: true },
   schoolCode: { type: String, required: true },
@@ -115,7 +116,7 @@ const ChatSessionSchema = new Schema<IChatSession>({
   updatedAt: { type: Date, default: Date.now },
 });
 
-// ⭐️ 채팅 메시지 스키마
+// 채팅 메시지 스키마
 const ChatMessageSchema = new Schema<IChatMessage>({
   sessionId: { type: Schema.Types.ObjectId, ref: 'ChatSession', required: true, index: true },
   role: { type: String, required: true, enum: ['user', 'assistant'] },
@@ -123,7 +124,7 @@ const ChatMessageSchema = new Schema<IChatMessage>({
   createdAt: { type: Date, default: Date.now },
 });
 
-// ⭐️ 시간표 스키마
+// 시간표 스키마
 const TimetableSchema = new Schema<ITimetable>({
   userId: { type: String, required: true, unique: true, index: true },
   courses: [{
@@ -139,12 +140,13 @@ const TimetableSchema = new Schema<ITimetable>({
   updatedAt: { type: Date, default: Date.now },
 }, { timestamps: true });
 
-// ⭐️ 알림 스키마
+// ⭐️ 알림 스키마 (수정됨: relatedUrl 추가)
 const NotificationSchema = new Schema<INotification>({
   userId: { type: String, required: true, index: true },
   type: { type: String, required: true, enum: ['system', 'comment', 'like'] },
   content: { type: String, required: true },
   isRead: { type: Boolean, default: false },
+  relatedUrl: { type: String, required: false }, // ⭐️ 필드 추가
   createdAt: { type: Date, default: Date.now },
 });
 
