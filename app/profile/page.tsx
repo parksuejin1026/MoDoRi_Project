@@ -180,7 +180,7 @@ export default function ProfilePage() {
 
                 <div className="mt-8 text-center">
                     <p className="text-xs text-muted-foreground">
-                        유니메이트 UniMate v2.0.0
+                        유니메이트 UniMate v2.1.0
                     </p>
                 </div>
             </div>
