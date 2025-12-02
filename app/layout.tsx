@@ -15,10 +15,10 @@ export const metadata: Metadata = {
   icons: {
     icon: '/icon.png',
     shortcut: '/icon.png',
-    apple: '/apple-icon.png',
+    apple: '/logo-180.png',
     other: {
       rel: 'apple-touch-icon-precomposed',
-      url: '/apple-icon.png',
+      url: '/logo-180.png',
     }
   },
   openGraph: {
