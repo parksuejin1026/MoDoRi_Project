@@ -13,12 +13,12 @@ export const metadata: Metadata = {
   title: 'UniMate - 대학 생활의 모든 것',
   description: '학칙 AI 비서부터 커뮤니티까지, 유니메이트와 함께하세요.',
   icons: {
-    icon: '/icon.png',
-    shortcut: '/icon.png',
-    apple: '/logo-180.png',
+    icon: '/logo-180.png?v=1',
+    shortcut: '/logo-180.png?v=1',
+    apple: '/logo-180.png?v=1',
     other: {
       rel: 'apple-touch-icon-precomposed',
-      url: '/logo-180.png',
+      url: '/logo-180.png?v=1',
     }
   },
   openGraph: {
