@@ -205,7 +205,7 @@ export default function CommunityPage() {
                             <Link
                                 href={`/community/${post._id}`}
                                 key={post._id}
-                                className="block bg-card border border-border rounded-xl p-4 hover:shadow-md transition-all cursor-pointer active:scale-[0.99]"
+                                className="block bg-card border border-border rounded-xl p-4 hover:bg-accent transition-all cursor-pointer active:scale-[0.99]"
                             >
                                 <div className="flex items-center gap-2 mb-2">
                                     <span className="px-2 py-1 rounded text-xs font-medium border bg-blue-50 text-blue-600 border-blue-200">

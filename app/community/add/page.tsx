@@ -100,7 +100,7 @@ export default function WritePage() {
 
   return (
     // ⭐️ [수정] pb-[60px] 추가: 글로벌 패딩 제거에 맞춰 하단 탭바 높이만큼 여백 확보
-    <div className="flex flex-col h-full bg-card relative pb-[60px]">
+    <div className="flex flex-col h-full bg-card relative pb-[47px]">
       {/* 헤더 */}
       <div className="flex items-center justify-between px-6 py-4 border-b border-border sticky top-0 bg-card z-10">
         <Link href="/community" className="flex items-center gap-2 text-muted-foreground hover:bg-accent px-2 py-1 rounded-md transition-colors">

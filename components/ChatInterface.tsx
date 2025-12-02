@@ -214,7 +214,7 @@ export default function ChatInterface({ schoolCode, schoolName, userId }: ChatIn
                 onClose={() => setIsSidebarOpen(false)}
             />
 
-            <div className="flex-1 flex flex-col h-full relative w-full pb-[70px]">
+            <div className="flex-1 flex flex-col h-full relative w-full pb-[47px]">
                 {/* 헤더 */}
                 <div className="px-4 py-2 bg-card dark:bg-background border-b border-border shrink-0 flex justify-between items-center shadow-sm">
                     <div className="flex items-center gap-2">
