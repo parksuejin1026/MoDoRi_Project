@@ -33,6 +33,7 @@ export interface IComment extends Document {
   author: string;
   content: string;
   school?: string;
+  parentId?: Types.ObjectId; // ⭐️ 대댓글을 위한 부모 댓글 ID
   createdAt: Date;
 }
 
@@ -69,7 +70,7 @@ export interface ITimetable extends Document {
   updatedAt: Date;
 }
 
-// ⭐️ 알림 인터페이스 (수정됨: relatedUrl 추가)
+// ⭐️ 알림 인터페이스
 export interface INotification extends Document {
   userId: string;
   type: 'system' | 'comment' | 'like';
@@ -104,6 +105,7 @@ const CommentSchema = new Schema<IComment>({
   author: { type: String, required: true },
   content: { type: String, required: true },
   school: { type: String, required: false },
+  parentId: { type: Schema.Types.ObjectId, ref: 'Comment', required: false }, // ⭐️ 대댓글 필드 추가
   createdAt: { type: Date, default: Date.now },
 });
 
@@ -140,13 +142,13 @@ const TimetableSchema = new Schema<ITimetable>({
   updatedAt: { type: Date, default: Date.now },
 }, { timestamps: true });
 
-// ⭐️ 알림 스키마 (수정됨: relatedUrl 추가)
+// ⭐️ 알림 스키마
 const NotificationSchema = new Schema<INotification>({
   userId: { type: String, required: true, index: true },
   type: { type: String, required: true, enum: ['system', 'comment', 'like'] },
   content: { type: String, required: true },
   isRead: { type: Boolean, default: false },
-  relatedUrl: { type: String, required: false }, // ⭐️ 필드 추가
+  relatedUrl: { type: String, required: false },
   createdAt: { type: Date, default: Date.now },
 });
 

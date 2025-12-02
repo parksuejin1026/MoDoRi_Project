@@ -5,15 +5,11 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { GraduationCap, Bell } from 'lucide-react';
 import ThemeToggle from '@/components/ThemeToggle';
-import { useTheme } from '@/context/ThemeProvider';
 
 export default function Header() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [hasUnread, setHasUnread] = useState(false); // ⭐️ 안 읽은 알림 상태 추가
     const pathname = usePathname();
-
-    const { theme } = useTheme();
-    const isDark = theme === 'dark';
 
     useEffect(() => {
         const userId = localStorage.getItem('userId') || localStorage.getItem('userEmail');
@@ -59,10 +55,7 @@ export default function Header() {
             {isLoggedIn && (
                 <Link
                     href="/notifications"
-                    className={`p-2 rounded-full transition-colors relative ${isDark
-                        ? 'text-yellow-400 hover:bg-gray-700'
-                        : 'text-gray-500 hover:bg-gray-100'
-                        }`}
+                    className="p-2 rounded-full transition-colors relative text-muted-foreground hover:text-foreground hover:bg-muted"
                 >
                     <Bell size={24} />
                     {/* ⭐️ 조건부 렌더링: 안 읽은 알림이 있을 때(hasUnread)만 빨간 점 표시 */}

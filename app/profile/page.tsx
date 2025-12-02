@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { User, School, CircleHelp, Shield, LogOut, Trash2, ChevronRight, X } from 'lucide-react';
+import { User, School, CircleHelp, Shield, LogOut, Trash2, ChevronRight, X, FileText, MessageSquare, Heart } from 'lucide-react';
 import { useGlobalModal } from '@/components/GlobalModal';
 
 export default function ProfilePage() {
@@ -16,6 +16,11 @@ export default function ProfilePage() {
 
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [deletePassword, setDeletePassword] = useState('');
+
+    // ⭐️ 활동 목록 모달 상태
+    const [activeModal, setActiveModal] = useState<'posts' | 'comments' | 'likes' | null>(null);
+    const [activityList, setActivityList] = useState<any[]>([]);
+    const [isLoadingActivity, setIsLoadingActivity] = useState(false);
 
     useEffect(() => {
         const storedId = localStorage.getItem('userId') || localStorage.getItem('userEmail');
@@ -46,6 +51,30 @@ export default function ProfilePage() {
             }
         } catch (error) {
             console.error("Failed to fetch stats:", error);
+        }
+    };
+
+    // ⭐️ 활동 목록 가져오기
+    const fetchActivity = async (type: 'posts' | 'comments' | 'likes') => {
+        setIsLoadingActivity(true);
+        setActiveModal(type);
+        setActivityList([]); // 초기화
+
+        try {
+            let url = `/api/user/activity?userId=${userId}&type=${type}`;
+            if (userSchool) {
+                url += `&school=${encodeURIComponent(userSchool)}`;
+            }
+            const res = await fetch(url);
+            if (res.ok) {
+                const result = await res.json();
+                setActivityList(result.data);
+            }
+        } catch (error) {
+            console.error(`Failed to fetch ${type}:`, error);
+            await showAlert('목록을 불러오는데 실패했습니다.');
+        } finally {
+            setIsLoadingActivity(false);
         }
     };
 
@@ -120,6 +149,94 @@ export default function ProfilePage() {
         </div>
     );
 
+    // ⭐️ 활동 목록 모달 컴포넌트
+    const ActivityModal = () => {
+        if (!activeModal) return null;
+
+        const titles = {
+            posts: '작성한 글',
+            comments: '작성한 댓글',
+            likes: '좋아요한 글'
+        };
+
+        return (
+            <div className="fixed inset-0 bg-black/50 z-[100] flex items-end sm:items-center justify-center sm:p-4 animate-in fade-in duration-200">
+                <div className="bg-background w-full max-w-[350px] h-[80vh] sm:h-[600px] sm:rounded-2xl rounded-t-2xl shadow-xl flex flex-col animate-in slide-in-from-bottom-10 duration-300">
+                    <div className="flex justify-between items-center p-4 border-b border-border">
+                        <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
+                            {activeModal === 'posts' && <FileText size={20} className="text-primary" />}
+                            {activeModal === 'comments' && <MessageSquare size={20} className="text-primary" />}
+                            {activeModal === 'likes' && <Heart size={20} className="text-red-500 fill-red-500" />}
+                            {titles[activeModal]}
+                        </h3>
+                        <button
+                            onClick={() => setActiveModal(null)}
+                            className="p-2 hover:bg-accent rounded-full transition-colors"
+                        >
+                            <X size={20} className="text-muted-foreground" />
+                        </button>
+                    </div>
+
+                    <div className="flex-1 overflow-y-auto p-4">
+                        {isLoadingActivity ? (
+                            <div className="flex justify-center items-center h-full">
+                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                            </div>
+                        ) : activityList.length > 0 ? (
+                            <div className="space-y-3">
+                                {activityList.map((item) => (
+                                    <div
+                                        key={item._id}
+                                        onClick={() => {
+                                            // 댓글인 경우 해당 게시글로 이동 (postId 필드 사용)
+                                            const targetId = activeModal === 'comments' ? item.postId : item._id;
+                                            if (targetId) {
+                                                router.push(`/community/${targetId}`);
+                                            } else {
+                                                showAlert('삭제된 게시글입니다.');
+                                            }
+                                        }}
+                                        className="p-4 bg-card border border-border rounded-xl hover:bg-accent transition-colors cursor-pointer"
+                                    >
+                                        {activeModal === 'comments' ? (
+                                            <>
+                                                <div className="text-sm font-medium text-foreground mb-1 line-clamp-2">
+                                                    {item.content}
+                                                </div>
+                                                <div className="text-xs text-muted-foreground flex items-center gap-1">
+                                                    <span className="bg-muted px-1.5 py-0.5 rounded text-[10px]">원글</span>
+                                                    <span className="truncate max-w-[200px]">{item.postTitle}</span>
+                                                </div>
+                                            </>
+                                        ) : (
+                                            <div className="text-base font-medium text-foreground mb-1 line-clamp-1">
+                                                {item.title}
+                                            </div>
+                                        )}
+
+                                        <div className="flex justify-between items-center mt-2 text-xs text-muted-foreground">
+                                            <span>{new Date(item.createdAt).toLocaleDateString()}</span>
+                                            {activeModal !== 'comments' && (
+                                                <div className="flex gap-2">
+                                                    <span>조회 {item.views || 0}</span>
+                                                    <span>좋아요 {(item.likes || []).length}</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
+                                <p>내역이 없습니다.</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
     return (
         <main className="flex-1 p-6 pb-24 bg-background min-h-screen relative">
             <div className="max-w-[393px] mx-auto">
@@ -141,18 +258,18 @@ export default function ProfilePage() {
                     </div>
 
                     <div className="grid grid-cols-3 gap-4 pt-6 border-t border-border">
-                        <div className="text-center">
+                        <button onClick={() => fetchActivity('posts')} className="text-center hover:bg-accent/50 p-2 rounded-lg transition-colors">
                             <div className="text-2xl font-bold text-primary mb-1">{stats.postCount}</div>
                             <div className="text-xs text-muted-foreground">작성한 글</div>
-                        </div>
-                        <div className="text-center">
+                        </button>
+                        <button onClick={() => fetchActivity('comments')} className="text-center hover:bg-accent/50 p-2 rounded-lg transition-colors">
                             <div className="text-2xl font-bold text-primary mb-1">{stats.commentCount}</div>
                             <div className="text-xs text-muted-foreground">댓글</div>
-                        </div>
-                        <div className="text-center">
+                        </button>
+                        <button onClick={() => fetchActivity('likes')} className="text-center hover:bg-accent/50 p-2 rounded-lg transition-colors">
                             <div className="text-2xl font-bold text-primary mb-1">{stats.likeCount}</div>
                             <div className="text-xs text-muted-foreground">좋아요</div>
-                        </div>
+                        </button>
                     </div>
                 </div>
 
@@ -184,6 +301,9 @@ export default function ProfilePage() {
                     </p>
                 </div>
             </div>
+
+            {/* ⭐️ 활동 목록 모달 */}
+            <ActivityModal />
 
             {isDeleteModalOpen && (
                 <div className="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center p-4">

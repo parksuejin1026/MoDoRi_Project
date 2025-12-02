@@ -4,7 +4,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect, useCallback } from 'react';
-import { ArrowLeft, ThumbsUp, MessageSquare, Edit, Trash, Check, X } from 'lucide-react';
+import { ArrowLeft, ThumbsUp, MessageSquare, Edit, Trash, Check, X, CornerDownRight, MessageCircle } from 'lucide-react';
 import DeleteButton from '@/components/DeleteButton';
 import { useGlobalModal } from '@/components/GlobalModal';
 
@@ -29,6 +29,7 @@ interface CommentData {
     content: string;
     createdAt: string;
     school?: string;
+    parentId?: string; // ⭐️ 대댓글 부모 ID
 }
 
 export default function ClientPostDetail({
@@ -52,6 +53,10 @@ export default function ClientPostDetail({
     const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
     const [editingContent, setEditingContent] = useState('');
     const [isAnonymous, setIsAnonymous] = useState(false);
+
+    // ⭐️ 대댓글 관련 상태
+    const [replyingToId, setReplyingToId] = useState<string | null>(null);
+    const [replyContent, setReplyContent] = useState('');
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
@@ -89,6 +94,7 @@ export default function ClientPostDetail({
         }
     };
 
+    // 댓글 작성 (부모 댓글)
     const handleCommentSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!commentText.trim() || !currentUserId || !postData) {
@@ -132,6 +138,47 @@ export default function ClientPostDetail({
         }
     };
 
+    // ⭐️ 대댓글 작성
+    const handleReplySubmit = async (parentId: string) => {
+        if (!replyContent.trim() || !currentUserId) {
+            showAlert("답글 내용을 입력해주세요.");
+            return;
+        }
+
+        const userName = isAnonymous ? '익명' : (localStorage.getItem('userName') || '익명');
+
+        const payload = {
+            postId: postData._id,
+            userId: currentUserId,
+            author: userName,
+            content: replyContent.trim(),
+            school: userSchool,
+            parentId: parentId, // ⭐️ 부모 ID 포함
+        };
+
+        try {
+            const response = await fetch(`/api/comments`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+            });
+
+            if (response.ok) {
+                const newComment = await response.json();
+                setComments((prev: CommentData[]) => [...prev, newComment.data]);
+                setReplyContent('');
+                setReplyingToId(null); // 답글 입력창 닫기
+                setIsAnonymous(false);
+            } else {
+                const errorData = await response.json();
+                showAlert(`답글 작성 실패: ${errorData.error || '오류가 발생했습니다.'}`);
+            }
+        } catch (error) {
+            console.error('Reply error:', error);
+            showAlert('답글 작성 중 오류가 발생했습니다.');
+        }
+    };
+
     const handleStartEdit = (comment: CommentData) => {
         if (currentUserId !== comment.userId) {
             showAlert('본인의 댓글만 수정할 수 있습니다.');
@@ -139,6 +186,7 @@ export default function ClientPostDetail({
         }
         setEditingCommentId(comment._id);
         setEditingContent(comment.content);
+        setReplyingToId(null); // 수정 시 답글 입력창 닫기
     };
 
     const handleEditSubmit = useCallback(async (commentId: string) => {
@@ -207,8 +255,156 @@ export default function ClientPostDetail({
     const isOwner = currentUserId && currentUserId === postData.userId;
     const isLikedByUser = (postData.likes || []).includes(currentUserId || '');
 
+    // ⭐️ 댓글 그룹화 (부모-자식)
+    const getReplies = (parentId: string) => comments.filter(c => c.parentId === parentId);
+
+    // ⭐️ 재귀적 댓글 렌더링 함수
+    const renderCommentTree = (comment: CommentData, depth: number = 0) => {
+        const isEditing = editingCommentId === comment._id;
+        const isCommentOwner = currentUserId === comment.userId;
+        const isReplying = replyingToId === comment._id;
+        const replies = getReplies(comment._id);
+        const hasParent = !!comment.parentId;
+
+        // ⭐️ 들여쓰기 제한 (최대 5단계까지만 들여쓰기 적용, 그 이후는 평탄하게)
+        const maxDepth = 5;
+        const shouldIndent = depth < maxDepth;
+
+        return (
+            <div key={comment._id} className="flex flex-col">
+                <div className={`p-3 rounded-xl border mb-2 ${hasParent ? 'bg-muted/50 border-border/50' : 'bg-muted border-border'}`}>
+                    <div className='flex justify-between items-start mb-1'>
+                        <div className="flex items-center gap-2">
+                            {hasParent && <CornerDownRight size={14} className="text-muted-foreground" />}
+                            <span className='font-medium text-sm text-foreground'>{comment.author}</span>
+                            {comment.school && (
+                                <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-100 text-blue-700 border border-blue-200">
+                                    {comment.school}
+                                </span>
+                            )}
+                        </div>
+                        <div className="flex gap-2 text-xs text-muted-foreground items-center">
+                            {/* 답글 달기 버튼 (모든 댓글에 표시 - 대댓글의 대댓글 가능) */}
+                            {!isEditing && currentUserId && (
+                                <button
+                                    onClick={() => {
+                                        setReplyingToId(isReplying ? null : comment._id);
+                                        setReplyContent('');
+                                    }}
+                                    className={`flex items-center gap-1 hover:text-foreground transition-colors ${isReplying ? 'text-primary' : ''}`}
+                                >
+                                    <MessageCircle size={14} />
+                                    <span>답글</span>
+                                </button>
+                            )}
+
+                            {isCommentOwner && (
+                                <>
+                                    <span className="text-border">|</span>
+                                    {isEditing ? (
+                                        <div className='flex gap-1'>
+                                            <button
+                                                onClick={() => handleEditSubmit(comment._id)}
+                                                className='text-primary hover:text-primary/70'
+                                            >
+                                                <Check size={16} />
+                                            </button>
+                                            <button
+                                                onClick={() => setEditingCommentId(null)}
+                                                className='text-muted-foreground hover:text-foreground'
+                                            >
+                                                <X size={16} />
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <div className='flex gap-1'>
+                                            <button
+                                                onClick={() => handleStartEdit(comment)}
+                                                className='text-muted-foreground hover:text-primary'
+                                            >
+                                                <Edit size={14} />
+                                            </button>
+                                            <button
+                                                onClick={() => handleDeleteComment(comment._id)}
+                                                className='text-muted-foreground hover:text-red-500'
+                                            >
+                                                <Trash size={14} />
+                                            </button>
+                                        </div>
+                                    )}
+                                </>
+                            )}
+                        </div>
+                    </div>
+
+                    {isEditing ? (
+                        <textarea
+                            value={editingContent}
+                            onChange={(e) => setEditingContent(e.target.value)}
+                            rows={1}
+                            className='w-full p-2 bg-card border border-primary/50 text-foreground rounded-lg text-sm resize-none focus:outline-none'
+                        />
+                    ) : (
+                        <p className='text-sm text-foreground break-words whitespace-pre-wrap'>{comment.content}</p>
+                    )}
+
+                    <div className='text-xs text-muted-foreground mt-1'>
+                        {new Date(comment.createdAt).toLocaleDateString()} {new Date(comment.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </div>
+
+                    {/* ⭐️ 답글 작성 폼 */}
+                    {isReplying && (
+                        <div className="mt-3 pl-4 border-l-2 border-primary/20 animate-in fade-in slide-in-from-top-2">
+                            <div className="flex gap-2">
+                                <textarea
+                                    value={replyContent}
+                                    onChange={(e) => setReplyContent(e.target.value)}
+                                    placeholder={`@${comment.author}님에게 답글 작성...`}
+                                    className="flex-1 p-2 bg-card border border-border rounded-lg text-sm resize-none focus:outline-none focus:border-primary"
+                                    rows={1}
+                                    autoFocus
+                                />
+                                <button
+                                    onClick={() => handleReplySubmit(comment._id)}
+                                    className="px-3 py-2 bg-primary text-primary-foreground text-xs rounded-lg hover:bg-primary/90 whitespace-nowrap"
+                                >
+                                    등록
+                                </button>
+                            </div>
+                            <div className="flex items-center gap-2 mt-1">
+                                <label className="flex items-center gap-1 text-xs text-muted-foreground cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={isAnonymous}
+                                        onChange={(e) => setIsAnonymous(e.target.checked)}
+                                        className="w-3 h-3 rounded border-border text-primary"
+                                    />
+                                    <span>익명</span>
+                                </label>
+                                <button
+                                    onClick={() => setReplyingToId(null)}
+                                    className="text-xs text-muted-foreground hover:text-foreground ml-auto"
+                                >
+                                    취소
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                {/* ⭐️ 재귀적으로 자식 댓글 렌더링 (들여쓰기 적용) */}
+                {replies.length > 0 && (
+                    <div className={`${shouldIndent ? 'pl-3 sm:pl-6 border-l border-border/30 ml-1 sm:ml-2' : 'mt-1'}`}>
+                        {replies.map(reply => renderCommentTree(reply, depth + 1))}
+                    </div>
+                )}
+            </div>
+        );
+    };
+
+    const rootComments = comments.filter(c => !c.parentId);
+
     return (
-        // ⭐️ [수정] h-full, overflow-y-auto 제거 / min-h-full, pb-24 추가
         <div className="flex flex-col min-h-full bg-background pb-24">
             <div className="bg-card border-b border-border px-6 py-3 sticky top-0 z-10">
                 <Link href="/community" className="flex items-center gap-2 text-muted-foreground hover:bg-accent w-fit px-2 py-1 rounded-md transition-colors">
@@ -290,76 +486,8 @@ export default function ClientPostDetail({
                 </h3>
 
                 <div className='space-y-4 mb-6'>
-                    {comments.length > 0 ? (
-                        comments.map((comment: CommentData) => {
-                            const isEditing = editingCommentId === comment._id;
-                            const isCommentOwner = currentUserId === comment.userId;
-
-                            return (
-                                <div key={comment._id} className='p-3 bg-muted rounded-xl border border-border'>
-                                    <div className='flex justify-between items-start mb-1'>
-                                        <div className="flex items-center gap-2">
-                                            <span className='font-medium text-sm text-foreground'>{comment.author}</span>
-                                            {comment.school && (
-                                                <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-100 text-blue-700 border border-blue-200">
-                                                    {comment.school}
-                                                </span>
-                                            )}
-                                        </div>
-                                        {isCommentOwner && (
-                                            <div className="flex gap-2 text-xs text-muted-foreground">
-                                                {isEditing ? (
-                                                    <div className='flex gap-1'>
-                                                        <button
-                                                            onClick={() => handleEditSubmit(comment._id)}
-                                                            className='text-primary hover:text-primary/70'
-                                                        >
-                                                            <Check size={16} />
-                                                        </button>
-                                                        <button
-                                                            onClick={() => setEditingCommentId(null)}
-                                                            className='text-muted-foreground hover:text-foreground'
-                                                        >
-                                                            <X size={16} />
-                                                        </button>
-                                                    </div>
-                                                ) : (
-                                                    <div className='flex gap-1'>
-                                                        <button
-                                                            onClick={() => handleStartEdit(comment)}
-                                                            className='text-muted-foreground hover:text-primary'
-                                                        >
-                                                            <Edit size={14} />
-                                                        </button>
-                                                        <button
-                                                            onClick={() => handleDeleteComment(comment._id)}
-                                                            className='text-muted-foreground hover:text-red-500'
-                                                        >
-                                                            <Trash size={14} />
-                                                        </button>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    {isEditing ? (
-                                        <textarea
-                                            value={editingContent}
-                                            onChange={(e) => setEditingContent(e.target.value)}
-                                            rows={1}
-                                            className='w-full p-2 bg-card border border-primary/50 text-foreground rounded-lg text-sm resize-none focus:outline-none'
-                                        />
-                                    ) : (
-                                        <p className='text-sm text-foreground break-words'>{comment.content}</p>
-                                    )}
-
-                                    <div className='text-xs text-muted-foreground mt-1'>
-                                        {new Date(comment.createdAt).toLocaleDateString()}
-                                    </div>
-                                </div>
-                            );
-                        })
+                    {rootComments.length > 0 ? (
+                        rootComments.map((comment) => renderCommentTree(comment))
                     ) : (
                         <div className="text-center py-8 text-muted-foreground bg-muted rounded-xl border border-border border-dashed">
                             <MessageSquare size={24} className="mx-auto mb-2 opacity-20" />

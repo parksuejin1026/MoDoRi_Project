@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
 
     try {
         const body = await req.json();
-        const { postId, userId, author, content, school } = body;
+        const { postId, userId, author, content, school, parentId } = body;
 
         // 필수 데이터 확인
         if (!postId || !userId || !author || !content) {
@@ -24,11 +24,16 @@ export async function POST(req: NextRequest) {
 
         // ObjectId 유효성 검사
         let validPostId: Types.ObjectId;
+        let validParentId: Types.ObjectId | undefined = undefined;
+
         try {
             validPostId = new Types.ObjectId(postId);
+            if (parentId) {
+                validParentId = new Types.ObjectId(parentId);
+            }
         } catch (e) {
             return NextResponse.json(
-                { success: false, error: '게시글 ID 형식이 올바르지 않습니다.' },
+                { success: false, error: 'ID 형식이 올바르지 않습니다.' },
                 { status: 400 }
             );
         }
@@ -40,6 +45,7 @@ export async function POST(req: NextRequest) {
             author: author,
             content: content.trim(),
             school: school,
+            parentId: validParentId, // ⭐️ 대댓글 부모 ID 저장
         });
 
         // 2. [알림 생성] 게시글 작성자에게 알림 발송
@@ -55,6 +61,21 @@ export async function POST(req: NextRequest) {
                 relatedUrl: `/community/${postId}`, // ⭐️ 이동할 링크 저장
                 createdAt: new Date(),
             });
+        }
+
+        // 3. [대댓글 알림] 부모 댓글 작성자에게 알림 발송 (부모 댓글이 있고, 작성자가 본인이 아닐 경우)
+        if (validParentId) {
+            const parentComment = await CommentModel.findById(validParentId);
+            if (parentComment && parentComment.userId !== userId) {
+                await NotificationModel.create({
+                    userId: parentComment.userId, // 수신자: 부모 댓글 작성자
+                    type: 'comment',
+                    content: `내 댓글에 답글이 달렸습니다: "${content.substring(0, 15)}${content.length > 15 ? '...' : ''}"`,
+                    isRead: false,
+                    relatedUrl: `/community/${postId}`,
+                    createdAt: new Date(),
+                });
+            }
         }
 
         const commentObject = JSON.parse(JSON.stringify(newComment));
