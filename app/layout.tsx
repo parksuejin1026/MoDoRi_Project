@@ -12,6 +12,15 @@ export const metadata: Metadata = {
   metadataBase: new URL('https://unimate.vercel.app'),
   title: 'UniMate - 대학 생활의 모든 것',
   description: '학칙 AI 비서부터 커뮤니티까지, 유니메이트와 함께하세요.',
+  icons: {
+    icon: '/icon.png',
+    shortcut: '/icon.png',
+    apple: '/apple-icon.png',
+    other: {
+      rel: 'apple-touch-icon-precomposed',
+      url: '/apple-icon.png',
+    }
+  },
   openGraph: {
     title: 'UniMate - 대학 생활의 든든한 친구',
     description: '복잡한 학칙은 AI에게 물어보고, 커뮤니티에서 학우들과 소통하세요!',
