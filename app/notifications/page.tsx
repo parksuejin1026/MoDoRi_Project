@@ -89,7 +89,11 @@ export default function NotificationsPage() {
 
         // 관련 링크가 있으면 이동
         if (notification.relatedUrl) {
+            console.log("Navigating to:", notification.relatedUrl);
             router.push(notification.relatedUrl);
+        } else {
+            console.warn("No relatedUrl for notification:", notification);
+            // alert("이 알림에는 이동할 링크가 없습니다.");
         }
     };
 

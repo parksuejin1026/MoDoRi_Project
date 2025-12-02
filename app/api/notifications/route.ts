@@ -57,7 +57,7 @@ export async function POST(request: Request) {
     try {
         await dbConnect();
         const body = await request.json();
-        const { userId, type, content } = body;
+        const { userId, type, content, relatedUrl } = body;
 
         if (!userId || !type || !content) {
             return NextResponse.json({ success: false, error: 'Missing required fields' }, { status: 400 });
@@ -67,7 +67,8 @@ export async function POST(request: Request) {
             userId,
             type,
             content,
-            isRead: false
+            isRead: false,
+            relatedUrl // ⭐️ 링크 저장
         });
 
         return NextResponse.json({ success: true, data: newNotification });

@@ -9,6 +9,7 @@ import { Toaster } from 'sonner';
 import ScrollToTop from '@/components/ScrollToTop';
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://unimate.vercel.app'),
   title: 'UniMate - 대학 생활의 모든 것',
   description: '학칙 AI 비서부터 커뮤니티까지, 유니메이트와 함께하세요.',
   openGraph: {

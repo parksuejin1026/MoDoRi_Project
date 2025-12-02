@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, FormEvent } from 'react';
+import { Message } from 'ai';
 import { useChat } from 'ai/react';
 import ReactMarkdown from 'react-markdown';
 import { Send, Bot, User, RotateCcw, AlertCircle, Menu } from 'lucide-react';
@@ -25,7 +26,7 @@ export default function ChatInterface({ schoolCode, schoolName, userId }: ChatIn
         body: {
             sessionId: currentSessionId,
         },
-        onError: (err) => {
+        onError: (err: Error) => {
             console.error("Chat Error:", err);
         },
     });
@@ -38,7 +39,7 @@ export default function ChatInterface({ schoolCode, schoolName, userId }: ChatIn
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages, isLoading]);
 
-    const onSubmit = async (e: React.FormEvent) => {
+    const onSubmit = async (e: FormEvent) => {
         e.preventDefault();
         if (!input.trim() || isLoading) return;
 
@@ -148,7 +149,7 @@ export default function ChatInterface({ schoolCode, schoolName, userId }: ChatIn
             return;
         }
 
-        setFeedbackStatus(prev => ({ ...prev, [messageId]: type }));
+        setFeedbackStatus((prev: Record<string, 'up' | 'down'>) => ({ ...prev, [messageId]: type }));
 
         try {
             const response = await fetch('/api/chat/feedback', {
@@ -166,7 +167,7 @@ export default function ChatInterface({ schoolCode, schoolName, userId }: ChatIn
             if (response.ok) {
                 showAlert('소중한 피드백 감사합니다!', '피드백 완료');
             } else {
-                setFeedbackStatus(prev => {
+                setFeedbackStatus((prev: Record<string, 'up' | 'down'>) => {
                     const newState = { ...prev };
                     delete newState[messageId];
                     return newState;
@@ -176,7 +177,7 @@ export default function ChatInterface({ schoolCode, schoolName, userId }: ChatIn
             }
         } catch (error) {
             console.error('Feedback send error:', error);
-            setFeedbackStatus(prev => {
+            setFeedbackStatus((prev: Record<string, 'up' | 'down'>) => {
                 const newState = { ...prev };
                 delete newState[messageId];
                 return newState;
@@ -197,7 +198,7 @@ export default function ChatInterface({ schoolCode, schoolName, userId }: ChatIn
                 onClose={() => setIsSidebarOpen(false)}
             />
 
-            <div className="flex-1 flex flex-col h-full relative w-full">
+            <div className="flex-1 flex flex-col h-full relative w-full pb-[70px]">
                 {/* 헤더 */}
                 <div className="px-4 py-2 bg-card dark:bg-background border-b border-border shrink-0 flex justify-between items-center shadow-sm">
                     <div className="flex items-center gap-2">
@@ -232,7 +233,7 @@ export default function ChatInterface({ schoolCode, schoolName, userId }: ChatIn
 
                 {/* 메시지 목록 */}
                 <div className="flex-1 overflow-y-auto p-5 pb-5 space-y-5 scroll-smooth bg-gray-100 dark:bg-black">
-                    {messages.map((msg) => (
+                    {messages.map((msg: Message) => (
                         <div key={msg.id} className={`flex gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : ''} animate-fade-in-up`}>
                             <div className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 shadow-sm ${msg.role === 'user' ? 'bg-muted text-muted-foreground' : 'bg-secondary text-secondary-foreground border border-border'}`}>
                                 {msg.role === 'user' ? <User size={18} /> : <Bot size={18} />}
