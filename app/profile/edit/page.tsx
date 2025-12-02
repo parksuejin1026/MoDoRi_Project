@@ -5,27 +5,30 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, CheckCircle2, AlertCircle } from 'lucide-react';
-import { useGlobalModal } from '@/components/GlobalModal'; // ⭐️ Import
+import { useGlobalModal } from '@/components/GlobalModal';
 
 export default function EditProfilePage() {
     const router = useRouter();
-    const { showAlert } = useGlobalModal(); // ⭐️ Hook
+    const { showAlert } = useGlobalModal();
 
     const [currentUserId, setCurrentUserId] = useState('');
     const [name, setName] = useState('');
+    const [email, setEmail] = useState(''); // ⭐️ 이메일 상태 추가
     const [newUserId, setNewUserId] = useState('');
     const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
 
     useEffect(() => {
-        const storedId = localStorage.getItem('userId') || localStorage.getItem('userEmail');
+        const storedId = localStorage.getItem('userId');
         const storedName = localStorage.getItem('userName');
+        const storedEmail = localStorage.getItem('userEmail'); // ⭐️ 이메일 가져오기
 
         if (storedId) {
             setCurrentUserId(storedId);
             setNewUserId(storedId);
             setName(storedName || '');
+            setEmail(storedEmail || storedId); // ⭐️ 이메일 초기화 (없으면 ID 사용)
         } else {
             router.replace('/login');
         }
@@ -59,6 +62,7 @@ export default function EditProfilePage() {
                     newUserId,
                     newPassword,
                     newName: name,
+                    newEmail: email, // ⭐️ 이메일 전송
                 }),
             });
 
@@ -68,7 +72,7 @@ export default function EditProfilePage() {
                 await showAlert('프로필이 성공적으로 수정되었습니다.', '수정 완료');
 
                 localStorage.setItem('userId', data.user.userid);
-                localStorage.setItem('userEmail', data.user.userid);
+                localStorage.setItem('userEmail', data.user.email); // ⭐️ 이메일 업데이트
                 localStorage.setItem('userName', data.user.name);
 
                 router.push('/profile');
@@ -122,11 +126,24 @@ export default function EditProfilePage() {
                                     * 아이디 변경 시 다시 로그인해야 할 수 있습니다.
                                 </p>
                             </div>
+
+                            {/* ⭐️ 이메일 입력 필드 추가 */}
+                            <div className="flex flex-col gap-2">
+                                <label htmlFor="email" className="text-sm font-semibold text-foreground">이메일</label>
+                                <input
+                                    id="email"
+                                    type="email"
+                                    className="w-full px-4 py-3 border border-border rounded-xl text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all bg-muted text-foreground"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    placeholder="이메일을 입력하세요"
+                                />
+                            </div>
                         </div>
 
                         <hr className="border-border my-2" />
 
-                        {/* 비밀번호 섹션 (간격 조정) */}
+                        {/* 비밀번호 섹션 */}
                         <div className="space-y-3">
                             <h3 className="text-sm font-bold text-foreground border-l-4 border-primary pl-2">보안 설정</h3>
 
@@ -170,17 +187,15 @@ export default function EditProfilePage() {
                             )}
                         </div>
 
-                        {/* ⭐️ [수정] 간격 및 색상 조정 섹션 */}
+                        {/* 현재 비밀번호 확인 섹션 */}
                         <div className="bg-yellow-50 dark:bg-yellow-950 px-4 py-3 rounded-xl border border-yellow-100 dark:border-yellow-900 mt-3">
                             <div className="flex flex-col gap-2">
-                                {/* ⭐️ [수정] 텍스트 색상 조정: text-yellow-700 dark:text-yellow-400 */}
                                 <label htmlFor="current-password" className="text-sm font-bold text-yellow-700 dark:text-yellow-400">
                                     현재 비밀번호 확인 (필수)
                                 </label>
                                 <input
                                     id="current-password"
                                     type="password"
-                                    // ⭐️ [수정] 입력 필드 테두리 색상 조정: border-yellow-100 dark:border-yellow-900
                                     className="w-full px-4 py-3 border border-yellow-100 dark:border-yellow-900 rounded-lg text-sm focus:outline-none focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 transition-all bg-card text-foreground"
                                     placeholder="본인 확인을 위해 입력해주세요"
                                     value={currentPassword}

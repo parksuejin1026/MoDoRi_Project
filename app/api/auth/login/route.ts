@@ -33,7 +33,8 @@ export async function POST(req: Request) {
             user: {
                 userid: user.userid,
                 name: user.name,
-                school: user.school
+                school: user.school,
+                email: user.email // ⭐️ 이메일 추가
             }
         }, { status: 200 });
 

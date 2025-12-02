@@ -34,7 +34,7 @@ export default function LoginPage() {
                 localStorage.setItem('userId', data.user.userid);
                 localStorage.setItem('userName', data.user.name);
                 localStorage.setItem('userSchool', data.user.school);
-                localStorage.setItem('userEmail', data.user.userid);
+                localStorage.setItem('userEmail', data.user.email || data.user.userid); // ⭐️ 이메일 저장 (없으면 ID)
 
                 router.push('/');
             } else {
