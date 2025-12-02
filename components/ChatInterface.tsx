@@ -35,9 +35,25 @@ export default function ChatInterface({ schoolCode, schoolName, userId }: ChatIn
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const [feedbackStatus, setFeedbackStatus] = useState<Record<string, 'up' | 'down'>>({});
 
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+    useEffect(() => {
+        if (textareaRef.current) {
+            textareaRef.current.style.height = 'auto';
+            textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 120)}px`;
+        }
+    }, [input]);
+
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages, isLoading]);
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            onSubmit(e as any);
+        }
+    };
 
     const onSubmit = async (e: FormEvent) => {
         e.preventDefault();
@@ -241,7 +257,7 @@ export default function ChatInterface({ schoolCode, schoolName, userId }: ChatIn
                             <div className={`max-w-[75%] p-2 rounded-2xl text-sm leading-relaxed shadow-sm ${msg.role === 'user' ? 'bg-primary text-primary-foreground rounded-tr-none' : 'bg-card text-foreground border border-border rounded-tl-none'}`}>
                                 {msg.role === 'assistant' ? (
                                     <>
-                                        <div className="prose prose-sm max-w-none text-foreground prose-p:my-1 prose-headings:font-bold prose-headings:text-foreground prose-strong:text-primary prose-strong:font-bold prose-ul:my-1 prose-li:my-0.5">
+                                        <div className="prose prose-sm max-w-none text-foreground prose-p:my-1 prose-headings:font-bold prose-headings:text-foreground prose-strong:text-primary prose-strong:font-bold prose-ul:my-1 prose-li:my-0.5 prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-primary prose-pre:bg-muted prose-pre:p-3 prose-pre:rounded-lg">
                                             <ReactMarkdown>{msg.content}</ReactMarkdown>
                                         </div>
                                         <div className='flex gap-2 mt-2 pt-2 border-t border-border/50 justify-end'>
@@ -283,8 +299,10 @@ export default function ChatInterface({ schoolCode, schoolName, userId }: ChatIn
                             <div className="w-9 h-9 rounded-full bg-secondary text-secondary-foreground border border-border flex items-center justify-center shrink-0 shadow-sm">
                                 <Bot size={18} />
                             </div>
-                            <div className="bg-card text-muted-foreground p-3.5 rounded-2xl rounded-tl-none border border-border text-sm animate-pulse shadow-sm">
-                                답변 생성 중...
+                            <div className="bg-card text-muted-foreground p-3.5 rounded-2xl rounded-tl-none border border-border text-sm shadow-sm flex items-center gap-1">
+                                <span className="w-1.5 h-1.5 bg-primary/60 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+                                <span className="w-1.5 h-1.5 bg-primary/60 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+                                <span className="w-1.5 h-1.5 bg-primary/60 rounded-full animate-bounce"></span>
                             </div>
                         </div>
                     )}
@@ -305,19 +323,22 @@ export default function ChatInterface({ schoolCode, schoolName, userId }: ChatIn
                         </div>
                     )}
 
-                    <form onSubmit={onSubmit} className="flex gap-2 items-center bg-card p-1 rounded-full border border-border shadow-sm focus-within:ring-2 focus-within:ring-primary/20 transition-all mb-1">
-                        <input
-                            className="flex-1 px-3 py-2 bg-transparent text-sm focus:outline-none text-foreground placeholder-muted-foreground min-w-0"
-                            placeholder="질문을 입력하세요..."
+                    <form onSubmit={onSubmit} className="flex gap-2 items-end bg-card p-2 rounded-[20px] border border-border shadow-sm focus-within:ring-2 focus-within:ring-primary/20 transition-all mb-1">
+                        <textarea
+                            ref={textareaRef}
+                            className="flex-1 px-2 py-1.5 bg-transparent text-sm focus:outline-none text-foreground placeholder-muted-foreground min-w-0 resize-none max-h-[120px] overflow-y-auto scrollbar-hide"
+                            placeholder="질문을 입력하세요... (Shift+Enter 줄바꿈)"
                             value={input}
                             onChange={handleInputChange}
+                            onKeyDown={handleKeyDown}
+                            rows={1}
                         />
                         <button
                             type="submit"
                             disabled={!input.trim() || isLoading}
-                            className="w-9 h-9 rounded-full bg-primary text-primary-foreground flex items-center justify-center shrink-0 disabled:bg-muted-foreground transition-all hover:bg-primary/90 active:scale-95 shadow-sm"
+                            className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center shrink-0 disabled:bg-muted-foreground transition-all hover:bg-primary/90 active:scale-95 shadow-sm mb-0.5"
                         >
-                            <Send size={16} />
+                            <Send size={15} />
                         </button>
                     </form>
                 </div>

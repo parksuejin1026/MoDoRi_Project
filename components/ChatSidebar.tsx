@@ -130,13 +130,22 @@ export default function ChatSidebar({
                     {/* 목록 영역 */}
                     <div className="flex-1 overflow-y-auto p-3 space-y-1">
                         {isLoading && sessions.length === 0 ? (
-                            <div className="text-center text-muted-foreground py-8 text-sm animate-pulse">기록을 불러오는 중...</div>
-                        ) : sessions.length === 0 ? (
-                            <div className="flex flex-col items-center justify-center h-40 text-muted-foreground text-sm gap-3">
-                                <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center">
-                                    <MessageSquare size={20} className="opacity-40" />
+                            // ⭐️ 스켈레톤 UI 적용
+                            Array.from({ length: 5 }).map((_, i) => (
+                                <div key={i} className="p-3 rounded-xl border border-border/40 space-y-2 animate-pulse">
+                                    <div className="h-4 bg-muted rounded w-3/4"></div>
+                                    <div className="h-3 bg-muted rounded w-1/2"></div>
                                 </div>
-                                <p>저장된 대화가 없습니다.</p>
+                            ))
+                        ) : sessions.length === 0 ? (
+                            <div className="flex flex-col items-center justify-center h-60 text-muted-foreground text-sm gap-4">
+                                <div className="w-16 h-16 bg-muted/50 rounded-full flex items-center justify-center mb-2">
+                                    <MessageSquare size={24} className="opacity-50" />
+                                </div>
+                                <div className="text-center">
+                                    <p className="font-medium text-foreground mb-1">대화 기록이 없습니다</p>
+                                    <p className="text-xs opacity-70">궁금한 점을 자유롭게 물어보세요!</p>
+                                </div>
                             </div>
                         ) : (
                             sessions.map((session) => (

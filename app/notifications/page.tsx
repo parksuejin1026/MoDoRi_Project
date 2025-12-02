@@ -138,13 +138,27 @@ export default function NotificationsPage() {
 
             <div className="flex-1 overflow-y-auto pb-24">
                 {isLoading ? (
-                    <div className="flex flex-col items-center justify-center h-64 text-muted-foreground animate-pulse">
-                        <p>알림을 불러오는 중...</p>
+                    // ⭐️ 스켈레톤 UI 적용
+                    <div className="divide-y divide-border">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                            <div key={i} className="p-4 flex gap-4 animate-pulse">
+                                <div className="w-8 h-8 bg-muted rounded-full shrink-0"></div>
+                                <div className="flex-1 space-y-2">
+                                    <div className="h-4 bg-muted rounded w-3/4"></div>
+                                    <div className="h-3 bg-muted rounded w-1/4"></div>
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 ) : notifications.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center h-64 text-muted-foreground">
-                        <Bell size={48} className="mb-4 opacity-20" />
-                        <p>새로운 알림이 없습니다.</p>
+                    <div className="flex flex-col items-center justify-center h-64 text-muted-foreground gap-4">
+                        <div className="w-20 h-20 bg-muted/30 rounded-full flex items-center justify-center mb-2">
+                            <Bell size={40} className="opacity-40" />
+                        </div>
+                        <div className="text-center">
+                            <p className="font-medium text-lg text-foreground mb-1">새로운 알림이 없습니다</p>
+                            <p className="text-sm opacity-70">커뮤니티 활동을 통해 소식을 받아보세요!</p>
+                        </div>
                     </div>
                 ) : (
                     <div className="divide-y divide-border">
