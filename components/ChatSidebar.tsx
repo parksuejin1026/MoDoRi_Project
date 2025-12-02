@@ -96,7 +96,7 @@ export default function ChatSidebar({
 
             {/* ⭐️ 사이드바 패널: fixed -> absolute (앱 컨테이너 기준) */}
             <div className={`
-                absolute inset-y-0 left-0 z-[60] w-72 bg-card border-r border-border transform transition-transform duration-300 ease-in-out shadow-2xl
+                absolute inset-y-0 left-0 z-[60] w-72 bg-card border-r border-border transform transition-transform duration-300 ease-in-out
                 ${isOpen ? 'translate-x-0' : '-translate-x-full'}
             `}>
                 <div className="flex flex-col h-full">
