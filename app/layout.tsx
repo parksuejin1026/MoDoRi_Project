@@ -12,6 +12,13 @@ export const metadata: Metadata = {
   metadataBase: new URL('https://unimate.vercel.app'),
   title: 'UniMate - 대학 생활의 모든 것',
   description: '학칙 AI 비서부터 커뮤니티까지, 유니메이트와 함께하세요.',
+
+  appleWebApp: {
+    capable: true, // ⭐️ iOS에서 앱처럼 실행 가능하게 설정
+    statusBarStyle: 'default', // 상단 상태바 스타일 (default, black, black-translucent)
+    title: 'UniMate', // 홈 화면에 추가될 때의 기본 이름
+  },
+
   icons: {
     icon: '/logo-180.png?v=1',
     shortcut: '/logo-180.png?v=1',
