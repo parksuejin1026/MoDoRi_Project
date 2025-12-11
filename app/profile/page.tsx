@@ -295,9 +295,12 @@ export default function ProfilePage() {
                     </div>
                 </div>
 
-                <div className="mt-8 text-center">
+                <div className="mt-8 text-center space-y-1">
                     <p className="text-xs text-muted-foreground">
-                        유니메이트 UniMate v2.1.0
+                        유니메이트 UniMate v2.2.0
+                    </p>
+                    <p className="text-[10px] text-muted-foreground/60 font-medium">
+                        Made by MoDoRi
                     </p>
                 </div>
             </div>

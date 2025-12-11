@@ -2,6 +2,7 @@
 import type { Metadata, Viewport } from 'next';
 import TabBar from '@/components/TabBar';
 import Header from '@/components/Header'; // ⭐️ Header 컴포넌트 임포트
+import SplashScreen from '@/components/SplashScreen';
 import '../styles/globals.css';
 import { GlobalModalProvider } from '@/components/GlobalModal';
 import { ThemeProvider } from '@/context/ThemeProvider';
@@ -62,6 +63,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <div className="app-container">
               {/* ⭐️ 복잡한 헤더 코드 대신 Header 컴포넌트 사용 */}
               <Header />
+              <SplashScreen />
 
               <main className="content-area">
                 {children}
